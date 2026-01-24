@@ -1,0 +1,112 @@
+// /src/syscall/platform/memory.ax
+namespace syscall
+
+// =============================================================================
+// Memory Management
+// =============================================================================
+
+// brk - Change data segment size
+func brk(addr: usize) (isize, isize) {
+    let ret: isize = syscall(SYS_BRK, addr)
+    // brk returns current break on failure, so checking is tricky
+    return (ret, 0)
+}
+
+// mmap - Map files or devices into memory
+func mmap(addr: usize, len: usize, prot: int32, flags: int32, fd: int32, offset: isize) (isize, isize) {
+    let ret: isize = syscall(SYS_MMAP, addr, len, prot, flags, fd, offset)
+    if (ret < 0) {
+        return (0, -ret)
+    }
+    return (ret, 0)
+}
+
+// munmap - Unmap files or devices from memory
+func munmap(addr: usize, len: usize) (isize, isize) {
+    let ret: isize = syscall(SYS_MUNMAP, addr, len)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// mprotect - Set protection on a region of memory
+func mprotect(addr: usize, len: usize, prot: int32) (isize, isize) {
+    let ret: isize = syscall(SYS_MPROTECT, addr, len, prot)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// mremap - Remap a virtual memory address
+func mremap(old_addr: usize, old_size: usize, new_size: usize, flags: int32, new_addr: usize) (isize, isize) {
+    let ret: isize = syscall(SYS_MREMAP, old_addr, old_size, new_size, flags, new_addr)
+    if (ret < 0) {
+        return (0, -ret)
+    }
+    return (ret, 0)
+}
+
+// madvise - Give advice about use of memory
+func madvise(addr: usize, len: usize, advice: int32) (isize, isize) {
+    let ret: isize = syscall(SYS_MADVISE, addr, len, advice)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// msync - Synchronize a file with a memory map
+func msync(addr: usize, len: usize, flags: int32) (isize, isize) {
+    let ret: isize = syscall(SYS_MSYNC, addr, len, flags)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// mincore - Determine whether pages are resident in memory
+func mincore(addr: usize, len: usize, vec: *byte) (isize, isize) {
+    let ret: isize = syscall(SYS_MINCORE, addr, len, vec)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// mlock - Lock memory
+func mlock(addr: usize, len: usize) (isize, isize) {
+    let ret: isize = syscall(SYS_MLOCK, addr, len)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// munlock - Unlock memory
+func munlock(addr: usize, len: usize) (isize, isize) {
+    let ret: isize = syscall(SYS_MUNLOCK, addr, len)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// mlockall - Lock all memory
+func mlockall(flags: int32) (isize, isize) {
+    let ret: isize = syscall(SYS_MLOCKALL, flags)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// munlockall - Unlock all memory
+func munlockall() (isize, isize) {
+    let ret: isize = syscall(SYS_MUNLOCKALL)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}

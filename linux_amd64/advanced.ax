@@ -1,0 +1,149 @@
+// /src/syscall/platform/advanced.ax
+namespace syscall
+
+// =============================================================================
+// Advanced I/O (epoll, eventfd, etc.)
+// =============================================================================
+
+// epoll_create - Create an epoll file descriptor
+func epoll_create(size: int32) (int32, isize) {
+    let ret: isize = syscall(SYS_EPOLL_CREATE, size)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (ret, 0)
+}
+
+// epoll_create1 - Create an epoll file descriptor with flags
+func epoll_create1(flags: int32) (int32, isize) {
+    let ret: isize = syscall(SYS_EPOLL_CREATE1, flags)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (ret, 0)
+}
+
+// epoll_ctl - Control interface for an epoll file descriptor
+func epoll_ctl(epfd: int32, op: int32, fd: int32, event: *EpollEvent) (isize, isize) {
+    let ret: isize = syscall(SYS_EPOLL_CTL, epfd, op, fd, event)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// epoll_wait - Wait for an I/O event on an epoll file descriptor
+func epoll_wait(epfd: int32, events: *EpollEvent, maxevents: int32, timeout: int32) (isize, isize) {
+    let ret: isize = syscall(SYS_EPOLL_WAIT, epfd, events, maxevents, timeout)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (ret, 0)
+}
+
+// epoll_pwait - Wait for an I/O event with signal mask
+func epoll_pwait(epfd: int32, events: *EpollEvent, maxevents: int32, timeout: int32, sigmask: *SigSet) (isize, isize) {
+    let ret: isize = syscall(SYS_EPOLL_PWAIT, epfd, events, maxevents, timeout, sigmask)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (ret, 0)
+}
+
+// eventfd - Create a file descriptor for event notification
+func eventfd(initval: uint32, flags: int32) (int32, isize) {
+    let ret: isize = syscall(SYS_EVENTFD2, initval, flags)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (ret, 0)
+}
+
+// eventfd2 - Create an eventfd with flags
+func eventfd2(initval: uint32, flags: int32) (int32, isize) {
+    let ret: isize = syscall(SYS_EVENTFD2, initval, flags)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (ret, 0)
+}
+
+// =============================================================================
+// System Information
+// =============================================================================
+
+// uname - Get system information
+func uname(buf: *UtsName) (isize, isize) {
+    let ret: isize = syscall(SYS_UNAME, buf)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// sysinfo - Return system information
+func sysinfo(info: *SysInfo) (isize, isize) {
+    let ret: isize = syscall(SYS_SYSINFO, info)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// getcpu - Determine CPU and NUMA node on which the calling thread is running
+func getcpu(cpu: *uint32, node: *uint32, cache: *byte) (isize, isize) {
+    let ret: isize = syscall(SYS_GETCPU, cpu, node, cache)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// =============================================================================
+// Miscellaneous
+// =============================================================================
+
+// getrandom - Obtain a series of random bytes
+func getrandom(buf: *byte, buflen: usize, flags: uint32) (isize, isize) {
+    let ret: isize = syscall(SYS_GETRANDOM, buf, buflen, flags)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (ret, 0)
+}
+
+// futex - Fast userspace locking
+func futex(uaddr: *int32, op: int32, val: int32, timeout: *TimeSpec, uaddr2: *int32, val3: int32) (isize, isize) {
+    let ret: isize = syscall(SYS_FUTEX, uaddr, op, val, timeout, uaddr2, val3)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (ret, 0)
+}
+
+// sched_yield - Yield the processor
+func sched_yield() (isize, isize) {
+    let ret: isize = syscall(SYS_SCHED_YIELD)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// reboot - Reboot or enable/disable Ctrl-Alt-Del
+func reboot(magic: int32, magic2: int32, cmd: int32, arg: *byte) (isize, isize) {
+    let ret: isize = syscall(SYS_REBOOT, magic, magic2, cmd, arg)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// syncfs - Sync filesystem
+func syncfs(fd: int32) (isize, isize) {
+    let ret: isize = syscall(SYS_SYNCFS, fd)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}

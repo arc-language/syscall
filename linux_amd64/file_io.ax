@@ -1,0 +1,236 @@
+// /src/syscall/platform/file_io.ax
+namespace syscall
+
+// =============================================================================
+// File I/O
+// =============================================================================
+
+// open - Open a file
+func open(filename: string, flags: int32, mode: int32) (int32, isize) {
+    let ret: isize = syscall(SYS_OPEN, filename, flags, mode)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (ret, 0)
+}
+
+// openat - Open file relative to directory file descriptor
+func openat(dirfd: int32, pathname: string, flags: int32, mode: int32) (int32, isize) {
+    let ret: isize = syscall(SYS_OPENAT, dirfd, pathname, flags, mode)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (ret, 0)
+}
+
+// creat - Create a file
+func creat(pathname: string, mode: int32) (int32, isize) {
+    let ret: isize = syscall(SYS_CREAT, pathname, mode)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (ret, 0)
+}
+
+// close - Close a file descriptor
+func close(fd: int32) (isize, isize) {
+    let ret: isize = syscall(SYS_CLOSE, fd)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// read - Read from a file descriptor
+func read(fd: int32, buf: *byte, count: usize) (isize, isize) {
+    let ret: isize = syscall(SYS_READ, fd, buf, count)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (ret, 0)
+}
+
+// write - Write to a file descriptor
+func write(fd: int32, buf: *byte, count: usize) (isize, isize) {
+    let ret: isize = syscall(SYS_WRITE, fd, buf, count)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (ret, 0)
+}
+
+// pread64 - Read from file descriptor at offset
+func pread64(fd: int32, buf: *byte, count: usize, offset: int64) (isize, isize) {
+    let ret: isize = syscall(SYS_PREAD64, fd, buf, count, offset)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (ret, 0)
+}
+
+// pwrite64 - Write to file descriptor at offset
+func pwrite64(fd: int32, buf: *byte, count: usize, offset: int64) (isize, isize) {
+    let ret: isize = syscall(SYS_PWRITE64, fd, buf, count, offset)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (ret, 0)
+}
+
+// readv - Read data into multiple buffers
+func readv(fd: int32, iov: *IOVec, iovcnt: int32) (isize, isize) {
+    let ret: isize = syscall(SYS_READV, fd, iov, iovcnt)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (ret, 0)
+}
+
+// writev - Write data from multiple buffers
+func writev(fd: int32, iov: *IOVec, iovcnt: int32) (isize, isize) {
+    let ret: isize = syscall(SYS_WRITEV, fd, iov, iovcnt)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (ret, 0)
+}
+
+// lseek - Reposition file offset
+func lseek(fd: int32, offset: isize, whence: int32) (isize, isize) {
+    let ret: isize = syscall(SYS_LSEEK, fd, offset, whence)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (ret, 0)
+}
+
+// dup - Duplicate a file descriptor
+func dup(oldfd: int32) (int32, isize) {
+    let ret: isize = syscall(SYS_DUP, oldfd)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (ret, 0)
+}
+
+// dup2 - Duplicate a file descriptor to specific fd
+func dup2(oldfd: int32, newfd: int32) (int32, isize) {
+    let ret: isize = syscall(SYS_DUP2, oldfd, newfd)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (ret, 0)
+}
+
+// dup3 - Duplicate a file descriptor with flags
+func dup3(oldfd: int32, newfd: int32, flags: int32) (int32, isize) {
+    let ret: isize = syscall(SYS_DUP3, oldfd, newfd, flags)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (ret, 0)
+}
+
+// pipe - Create a pipe
+func pipe(pipefd: *int32) (isize, isize) {
+    let ret: isize = syscall(SYS_PIPE, pipefd)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// pipe2 - Create a pipe with flags
+func pipe2(pipefd: *int32, flags: int32) (isize, isize) {
+    let ret: isize = syscall(SYS_PIPE2, pipefd, flags)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// fcntl - Manipulate file descriptor
+func fcntl(fd: int32, cmd: int32, arg: isize) (isize, isize) {
+    let ret: isize = syscall(SYS_FCNTL, fd, cmd, arg)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (ret, 0)
+}
+
+// ioctl - Device-specific input/output operations
+func ioctl(fd: int32, request: usize, arg: usize) (isize, isize) {
+    let ret: isize = syscall(SYS_IOCTL, fd, request, arg)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (ret, 0)
+}
+
+// fsync - Synchronize file's in-core state with storage
+func fsync(fd: int32) (isize, isize) {
+    let ret: isize = syscall(SYS_FSYNC, fd)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// fdatasync - Synchronize file's data
+func fdatasync(fd: int32) (isize, isize) {
+    let ret: isize = syscall(SYS_FDATASYNC, fd)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// sync - Commit filesystem caches to disk
+func sync() {
+    syscall(SYS_SYNC)
+}
+
+// truncate - Truncate a file to specified length
+func truncate(path: string, length: isize) (isize, isize) {
+    let ret: isize = syscall(SYS_TRUNCATE, path, length)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// ftruncate - Truncate an open file
+func ftruncate(fd: int32, length: isize) (isize, isize) {
+    let ret: isize = syscall(SYS_FTRUNCATE, fd, length)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// poll - Wait for events on file descriptors
+func poll(fds: *PollFd, nfds: usize, timeout: int32) (isize, isize) {
+    let ret: isize = syscall(SYS_POLL, fds, nfds, timeout)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (ret, 0)
+}
+
+// select - Synchronous I/O multiplexing
+func select(nfds: int32, readfds: *byte, writefds: *byte, exceptfds: *byte, timeout: *TimeVal) (isize, isize) {
+    let ret: isize = syscall(SYS_SELECT, nfds, readfds, writefds, exceptfds, timeout)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (ret, 0)
+}
+
+// sendfile - Transfer data between file descriptors
+func sendfile(out_fd: int32, in_fd: int32, offset: *int64, count: usize) (isize, isize) {
+    let ret: isize = syscall(SYS_SENDFILE, out_fd, in_fd, offset, count)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (ret, 0)
+}

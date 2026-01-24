@@ -1,0 +1,225 @@
+// /src/syscall/platform/process.ax
+namespace syscall
+
+// =============================================================================
+// Process Management
+// =============================================================================
+
+// execve - Execute program
+// Returns: (-1, errno) on failure. Does not return on success.
+func execve(filename: string, argv: *string, envp: *string) (isize, isize) {
+    let ret: isize = syscall(SYS_EXECVE, filename, argv, envp)
+    return (-1, -ret)
+}
+
+// exit - Terminate the process immediately
+func exit(code: int32) {
+    syscall(SYS_EXIT, code)
+}
+
+// exit_group - Terminate all threads in process
+func exit_group(code: int32) {
+    syscall(SYS_EXIT_GROUP, code)
+}
+
+// getpid - Get process ID
+func getpid() int32 {
+    let pid: isize = syscall(SYS_GETPID)
+    return pid
+}
+
+// getppid - Get parent process ID
+func getppid() int32 {
+    let ret: isize = syscall(SYS_GETPPID)
+    return ret
+}
+
+// gettid - Get thread ID
+func gettid() int32 {
+    let ret: isize = syscall(SYS_GETTID)
+    return ret
+}
+
+// fork - Create a new process
+// Returns: (child_pid, errno). child_pid is 0 in the child, and the child's PID in the parent.
+func fork() (int32, isize) {
+    let ret: isize = syscall(SYS_FORK)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (ret, 0)
+}
+
+// vfork - Create a new process and block parent
+func vfork() (int32, isize) {
+    let ret: isize = syscall(SYS_VFORK)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (ret, 0)
+}
+
+// clone - Create a child process or thread
+func clone(flags: uint64, stack: *byte, ptid: *int32, ctid: *int32, tls: uint64) (int32, isize) {
+    let ret: isize = syscall(SYS_CLONE, flags, stack, ptid, ctid, tls)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (ret, 0)
+}
+
+// wait4 - Wait for process to change state
+func wait4(pid: int32, wstatus: *int32, options: int32, rusage: *RUsage) (int32, isize) {
+    let ret: isize = syscall(SYS_WAIT4, pid, wstatus, options, rusage)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (ret, 0)
+}
+
+// waitid - Wait for process to change state (extended)
+func waitid(idtype: int32, id: int32, infop: *byte, options: int32, rusage: *RUsage) (isize, isize) {
+    let ret: isize = syscall(SYS_WAITID, idtype, id, infop, options, rusage)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// kill - Send signal to a process
+func kill(pid: int32, sig: int32) (isize, isize) {
+    let ret: isize = syscall(SYS_KILL, pid, sig)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// tkill - Send signal to a thread
+func tkill(tid: int32, sig: int32) (isize, isize) {
+    let ret: isize = syscall(SYS_TKILL, tid, sig)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// tgkill - Send signal to a thread in a thread group
+func tgkill(tgid: int32, tid: int32, sig: int32) (isize, isize) {
+    let ret: isize = syscall(SYS_TGKILL, tgid, tid, sig)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// getuid - Get user ID
+func getuid() int32 {
+    let ret: isize = syscall(SYS_GETUID)
+    return ret
+}
+
+// geteuid - Get effective user ID
+func geteuid() int32 {
+    let ret: isize = syscall(SYS_GETEUID)
+    return ret
+}
+
+// getgid - Get group ID
+func getgid() int32 {
+    let ret: isize = syscall(SYS_GETGID)
+    return ret
+}
+
+// getegid - Get effective group ID
+func getegid() int32 {
+    let ret: isize = syscall(SYS_GETEGID)
+    return ret
+}
+
+// setuid - Set user ID
+func setuid(uid: int32) (isize, isize) {
+    let ret: isize = syscall(SYS_SETUID, uid)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// setgid - Set group ID
+func setgid(gid: int32) (isize, isize) {
+    let ret: isize = syscall(SYS_SETGID, gid)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// setsid - Create a session and set process group ID
+func setsid() (int32, isize) {
+    let ret: isize = syscall(SYS_SETSID)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (ret, 0)
+}
+
+// setpgid - Set process group ID
+func setpgid(pid: int32, pgid: int32) (isize, isize) {
+    let ret: isize = syscall(SYS_SETPGID, pid, pgid)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// getpgid - Get process group ID
+func getpgid(pid: int32) (int32, isize) {
+    let ret: isize = syscall(SYS_GETPGID, pid)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (ret, 0)
+}
+
+// getpgrp - Get process group
+func getpgrp() int32 {
+    let ret: isize = syscall(SYS_GETPGRP)
+    return ret
+}
+
+// prctl - Operations on a process or thread
+func prctl(option: int32, arg2: usize, arg3: usize, arg4: usize, arg5: usize) (isize, isize) {
+    let ret: isize = syscall(SYS_PRCTL, option, arg2, arg3, arg4, arg5)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (ret, 0)
+}
+
+// getrusage - Get resource usage
+func getrusage(who: int32, usage: *RUsage) (isize, isize) {
+    let ret: isize = syscall(SYS_GETRUSAGE, who, usage)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// getpriority - Get program scheduling priority
+func getpriority(which: int32, who: int32) (isize, isize) {
+    let ret: isize = syscall(SYS_GETPRIORITY, which, who)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (ret, 0)
+}
+
+// setpriority - Set program scheduling priority
+func setpriority(which: int32, who: int32, prio: int32) (isize, isize) {
+    let ret: isize = syscall(SYS_SETPRIORITY, which, who, prio)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}

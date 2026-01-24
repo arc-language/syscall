@@ -1,0 +1,250 @@
+// /src/syscall/platform/constants.ax
+namespace syscall
+
+// =============================================================================
+// File Flags and Modes
+// =============================================================================
+
+// open() flags
+const O_RDONLY: int32 = 0
+const O_WRONLY: int32 = 1
+const O_RDWR: int32 = 2
+const O_CREAT: int32 = 64
+const O_EXCL: int32 = 128
+const O_NOCTTY: int32 = 256
+const O_TRUNC: int32 = 512
+const O_APPEND: int32 = 1024
+const O_NONBLOCK: int32 = 2048
+const O_DSYNC: int32 = 4096
+const O_ASYNC: int32 = 8192
+const O_DIRECT: int32 = 16384
+const O_DIRECTORY: int32 = 65536
+const O_NOFOLLOW: int32 = 131072
+const O_NOATIME: int32 = 262144
+const O_CLOEXEC: int32 = 524288
+const O_SYNC: int32 = 1052672
+const O_PATH: int32 = 2097152
+const O_TMPFILE: int32 = 4259840
+
+// File permissions
+const S_IRWXU: int32 = 448   // User RWX
+const S_IRUSR: int32 = 256   // User read
+const S_IWUSR: int32 = 128   // User write
+const S_IXUSR: int32 = 64    // User execute
+const S_IRWXG: int32 = 56    // Group RWX
+const S_IRGRP: int32 = 32    // Group read
+const S_IWGRP: int32 = 16    // Group write
+const S_IXGRP: int32 = 8     // Group execute
+const S_IRWXO: int32 = 7     // Other RWX
+const S_IROTH: int32 = 4     // Other read
+const S_IWOTH: int32 = 2     // Other write
+const S_IXOTH: int32 = 1     // Other execute
+
+// access() modes
+const F_OK: int32 = 0        // File exists
+const X_OK: int32 = 1        // Execute permission
+const W_OK: int32 = 2        // Write permission
+const R_OK: int32 = 4        // Read permission
+
+// lseek() whence
+const SEEK_SET: int32 = 0
+const SEEK_CUR: int32 = 1
+const SEEK_END: int32 = 2
+
+// fcntl() commands
+const F_DUPFD: int32 = 0
+const F_GETFD: int32 = 1
+const F_SETFD: int32 = 2
+const F_GETFL: int32 = 3
+const F_SETFL: int32 = 4
+const F_GETLK: int32 = 5
+const F_SETLK: int32 = 6
+const F_SETLKW: int32 = 7
+const FD_CLOEXEC: int32 = 1
+
+// =============================================================================
+// Memory Management
+// =============================================================================
+
+// mmap() protection flags
+const PROT_NONE: int32 = 0
+const PROT_READ: int32 = 1
+const PROT_WRITE: int32 = 2
+const PROT_EXEC: int32 = 4
+
+// mmap() flags
+const MAP_SHARED: int32 = 1
+const MAP_PRIVATE: int32 = 2
+const MAP_FIXED: int32 = 16
+const MAP_ANONYMOUS: int32 = 32
+const MAP_ANON: int32 = 32
+const MAP_GROWSDOWN: int32 = 256
+const MAP_DENYWRITE: int32 = 2048
+const MAP_EXECUTABLE: int32 = 4096
+const MAP_LOCKED: int32 = 8192
+const MAP_NORESERVE: int32 = 16384
+const MAP_POPULATE: int32 = 32768
+const MAP_NONBLOCK: int32 = 65536
+
+// madvise() advice
+const MADV_NORMAL: int32 = 0
+const MADV_RANDOM: int32 = 1
+const MADV_SEQUENTIAL: int32 = 2
+const MADV_WILLNEED: int32 = 3
+const MADV_DONTNEED: int32 = 4
+
+// =============================================================================
+// Network Constants
+// =============================================================================
+
+// Address families
+const AF_UNSPEC: int32 = 0
+const AF_UNIX: int32 = 1
+const AF_LOCAL: int32 = 1
+const AF_INET: int32 = 2
+const AF_INET6: int32 = 10
+const AF_PACKET: int32 = 17
+
+// Socket types (use sock_type parameter to avoid 'type' keyword)
+const SOCK_STREAM: int32 = 1
+const SOCK_DGRAM: int32 = 2
+const SOCK_RAW: int32 = 3
+const SOCK_SEQPACKET: int32 = 5
+const SOCK_NONBLOCK: int32 = 2048
+const SOCK_CLOEXEC: int32 = 524288
+
+// Protocols
+const IPPROTO_IP: int32 = 0
+const IPPROTO_ICMP: int32 = 1
+const IPPROTO_TCP: int32 = 6
+const IPPROTO_UDP: int32 = 17
+const IPPROTO_IPV6: int32 = 41
+const IPPROTO_RAW: int32 = 255
+
+// Socket options (SOL_SOCKET level)
+const SOL_SOCKET: int32 = 1
+const SO_DEBUG: int32 = 1
+const SO_REUSEADDR: int32 = 2
+const SO_TYPE: int32 = 3
+const SO_ERROR: int32 = 4
+const SO_DONTROUTE: int32 = 5
+const SO_BROADCAST: int32 = 6
+const SO_SNDBUF: int32 = 7
+const SO_RCVBUF: int32 = 8
+const SO_KEEPALIVE: int32 = 9
+const SO_OOBINLINE: int32 = 10
+const SO_LINGER: int32 = 13
+const SO_REUSEPORT: int32 = 15
+const SO_RCVTIMEO: int32 = 20
+const SO_SNDTIMEO: int32 = 21
+
+// shutdown() how
+const SHUT_RD: int32 = 0
+const SHUT_WR: int32 = 1
+const SHUT_RDWR: int32 = 2
+
+// poll() events
+const POLLIN: int16 = 1
+const POLLPRI: int16 = 2
+const POLLOUT: int16 = 4
+const POLLERR: int16 = 8
+const POLLHUP: int16 = 16
+const POLLNVAL: int16 = 32
+
+// =============================================================================
+// Signals
+// =============================================================================
+
+const SIGHUP: int32 = 1
+const SIGINT: int32 = 2
+const SIGQUIT: int32 = 3
+const SIGILL: int32 = 4
+const SIGTRAP: int32 = 5
+const SIGABRT: int32 = 6
+const SIGBUS: int32 = 7
+const SIGFPE: int32 = 8
+const SIGKILL: int32 = 9
+const SIGUSR1: int32 = 10
+const SIGSEGV: int32 = 11
+const SIGUSR2: int32 = 12
+const SIGPIPE: int32 = 13
+const SIGALRM: int32 = 14
+const SIGTERM: int32 = 15
+const SIGCHLD: int32 = 17
+const SIGCONT: int32 = 18
+const SIGSTOP: int32 = 19
+const SIGTSTP: int32 = 20
+const SIGTTIN: int32 = 21
+const SIGTTOU: int32 = 22
+
+// Signal actions
+const SIG_BLOCK: int32 = 0
+const SIG_UNBLOCK: int32 = 1
+const SIG_SETMASK: int32 = 2
+
+// =============================================================================
+// Process/Wait flags
+// =============================================================================
+
+const WNOHANG: int32 = 1
+const WUNTRACED: int32 = 2
+const WCONTINUED: int32 = 8
+
+const RUSAGE_SELF: int32 = 0
+const RUSAGE_CHILDREN: int32 = -1
+const RUSAGE_THREAD: int32 = 1
+
+// =============================================================================
+// Clock IDs
+// =============================================================================
+
+const CLOCK_REALTIME: int32 = 0
+const CLOCK_MONOTONIC: int32 = 1
+const CLOCK_PROCESS_CPUTIME_ID: int32 = 2
+const CLOCK_THREAD_CPUTIME_ID: int32 = 3
+const CLOCK_BOOTTIME: int32 = 7
+
+// =============================================================================
+// Epoll
+// =============================================================================
+
+const EPOLL_CLOEXEC: int32 = 524288
+const EPOLL_CTL_ADD: int32 = 1
+const EPOLL_CTL_DEL: int32 = 2
+const EPOLL_CTL_MOD: int32 = 3
+
+const EPOLLIN: uint32 = 1
+const EPOLLPRI: uint32 = 2
+const EPOLLOUT: uint32 = 4
+const EPOLLERR: uint32 = 8
+const EPOLLHUP: uint32 = 16
+const EPOLLET: uint32 = 2147483648
+const EPOLLONESHOT: uint32 = 1073741824
+
+// =============================================================================
+// Error Numbers
+// =============================================================================
+
+const EPERM: isize = 1
+const ENOENT: isize = 2
+const ESRCH: isize = 3
+const EINTR: isize = 4
+const EIO: isize = 5
+const ENXIO: isize = 6
+const E2BIG: isize = 7
+const ENOEXEC: isize = 8
+const EBADF: isize = 9
+const ECHILD: isize = 10
+const EAGAIN: isize = 11
+const ENOMEM: isize = 12
+const EACCES: isize = 13
+const EFAULT: isize = 14
+const EBUSY: isize = 16
+const EEXIST: isize = 17
+const ENODEV: isize = 19
+const ENOTDIR: isize = 20
+const EISDIR: isize = 21
+const EINVAL: isize = 22
+const EMFILE: isize = 24
+const ENOSPC: isize = 28
+const EPIPE: isize = 32

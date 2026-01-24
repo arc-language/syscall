@@ -1,0 +1,150 @@
+// /src/syscall/platform/network.ax
+namespace syscall
+
+// =============================================================================
+// Networking
+// =============================================================================
+
+// socket - Create an endpoint for communication
+func socket(domain: int32, sock_type: int32, protocol: int32) (int32, isize) {
+    let ret: isize = syscall(SYS_SOCKET, domain, sock_type, protocol)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (ret, 0)
+}
+
+// socketpair - Create a pair of connected sockets
+func socketpair(domain: int32, sock_type: int32, protocol: int32, sv: *int32) (isize, isize) {
+    let ret: isize = syscall(SYS_SOCKETPAIR, domain, sock_type, protocol, sv)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// bind - Bind a name to a socket
+func bind(sockfd: int32, addr: *SockAddr, addrlen: int32) (isize, isize) {
+    let ret: isize = syscall(SYS_BIND, sockfd, addr, addrlen)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// listen - Listen for connections on a socket
+func listen(sockfd: int32, backlog: int32) (isize, isize) {
+    let ret: isize = syscall(SYS_LISTEN, sockfd, backlog)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// accept - Accept a connection on a socket
+func accept(sockfd: int32, addr: *SockAddr, addrlen: *int32) (int32, isize) {
+    let ret: isize = syscall(SYS_ACCEPT, sockfd, addr, addrlen)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (ret, 0)
+}
+
+// accept4 - Accept connection with flags
+func accept4(sockfd: int32, addr: *SockAddr, addrlen: *int32, flags: int32) (int32, isize) {
+    let ret: isize = syscall(SYS_ACCEPT4, sockfd, addr, addrlen, flags)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (ret, 0)
+}
+
+// connect - Initiate a connection on a socket
+func connect(sockfd: int32, addr: *SockAddr, addrlen: int32) (isize, isize) {
+    let ret: isize = syscall(SYS_CONNECT, sockfd, addr, addrlen)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// getsockname - Get socket name
+func getsockname(sockfd: int32, addr: *SockAddr, addrlen: *int32) (isize, isize) {
+    let ret: isize = syscall(SYS_GETSOCKNAME, sockfd, addr, addrlen)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// getpeername - Get name of connected peer socket
+func getpeername(sockfd: int32, addr: *SockAddr, addrlen: *int32) (isize, isize) {
+    let ret: isize = syscall(SYS_GETPEERNAME, sockfd, addr, addrlen)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// sendto - Send a message on a socket
+func sendto(sockfd: int32, buf: *byte, len: usize, flags: int32, dest_addr: *SockAddr, addrlen: int32) (isize, isize) {
+    let ret: isize = syscall(SYS_SENDTO, sockfd, buf, len, flags, dest_addr, addrlen)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (ret, 0)
+}
+
+// recvfrom - Receive a message from a socket
+func recvfrom(sockfd: int32, buf: *byte, len: usize, flags: int32, src_addr: *SockAddr, addrlen: *int32) (isize, isize) {
+    let ret: isize = syscall(SYS_RECVFROM, sockfd, buf, len, flags, src_addr, addrlen)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (ret, 0)
+}
+
+// sendmsg - Send a message on a socket
+func sendmsg(sockfd: int32, msg: *byte, flags: int32) (isize, isize) {
+    let ret: isize = syscall(SYS_SENDMSG, sockfd, msg, flags)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (ret, 0)
+}
+
+// recvmsg - Receive a message from a socket
+func recvmsg(sockfd: int32, msg: *byte, flags: int32) (isize, isize) {
+    let ret: isize = syscall(SYS_RECVMSG, sockfd, msg, flags)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (ret, 0)
+}
+
+// setsockopt - Set socket options
+func setsockopt(sockfd: int32, level: int32, optname: int32, optval: *byte, optlen: int32) (isize, isize) {
+    let ret: isize = syscall(SYS_SETSOCKOPT, sockfd, level, optname, optval, optlen)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// getsockopt - Get socket options
+func getsockopt(sockfd: int32, level: int32, optname: int32, optval: *byte, optlen: *int32) (isize, isize) {
+    let ret: isize = syscall(SYS_GETSOCKOPT, sockfd, level, optname, optval, optlen)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// shutdown - Shut down part of a full-duplex connection
+func shutdown(sockfd: int32, how: int32) (isize, isize) {
+    let ret: isize = syscall(SYS_SHUTDOWN, sockfd, how)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}

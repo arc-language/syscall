@@ -1,0 +1,145 @@
+// /src/syscall/platform/time_signal.ax
+namespace syscall
+
+// =============================================================================
+// Time Functions
+// =============================================================================
+
+// nanosleep - Sleep for specified time
+func nanosleep(req: *TimeSpec, rem: *TimeSpec) (isize, isize) {
+    let ret: isize = syscall(SYS_NANOSLEEP, req, rem)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// clock_nanosleep - High-resolution sleep with clock
+func clock_nanosleep(clockid: int32, flags: int32, req: *TimeSpec, rem: *TimeSpec) (isize, isize) {
+    let ret: isize = syscall(SYS_CLOCK_NANOSLEEP, clockid, flags, req, rem)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// gettimeofday - Get time
+func gettimeofday(tv: *TimeVal, tz: *byte) (isize, isize) {
+    let ret: isize = syscall(SYS_GETTIMEOFDAY, tv, tz)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// settimeofday - Set time
+func settimeofday(tv: *TimeVal, tz: *byte) (isize, isize) {
+    let ret: isize = syscall(SYS_SETTIMEOFDAY, tv, tz)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// clock_gettime - Get time from specific clock
+func clock_gettime(clockid: int32, tp: *TimeSpec) (isize, isize) {
+    let ret: isize = syscall(SYS_CLOCK_GETTIME, clockid, tp)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// clock_settime - Set time on specific clock
+func clock_settime(clockid: int32, tp: *TimeSpec) (isize, isize) {
+    let ret: isize = syscall(SYS_CLOCK_SETTIME, clockid, tp)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// clock_getres - Get clock resolution
+func clock_getres(clockid: int32, res: *TimeSpec) (isize, isize) {
+    let ret: isize = syscall(SYS_CLOCK_GETRES, clockid, res)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// time - Get time in seconds
+func time(tloc: *int64) int64 {
+    let ret: isize = syscall(SYS_TIME, tloc)
+    return ret
+}
+
+// times - Get process times
+func times(buf: *Tms) isize {
+    let ret: isize = syscall(SYS_TIMES, buf)
+    return ret
+}
+
+// alarm - Set an alarm clock for delivery of a signal
+func alarm(seconds: uint32) uint32 {
+    let ret: isize = syscall(SYS_ALARM, seconds)
+    return ret
+}
+
+// =============================================================================
+// Signal Handling
+// =============================================================================
+
+// rt_sigaction - Examine and change a signal action
+func rt_sigaction(signum: int32, act: *SigAction, oldact: *SigAction, sigsetsize: usize) (isize, isize) {
+    let ret: isize = syscall(SYS_RT_SIGACTION, signum, act, oldact, sigsetsize)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// rt_sigprocmask - Examine and change blocked signals
+func rt_sigprocmask(how: int32, set: *SigSet, oldset: *SigSet, sigsetsize: usize) (isize, isize) {
+    let ret: isize = syscall(SYS_RT_SIGPROCMASK, how, set, oldset, sigsetsize)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// rt_sigpending - Examine pending signals
+func rt_sigpending(set: *SigSet, sigsetsize: usize) (isize, isize) {
+    let ret: isize = syscall(SYS_RT_SIGPENDING, set, sigsetsize)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// rt_sigsuspend - Wait for a signal
+func rt_sigsuspend(mask: *SigSet, sigsetsize: usize) (isize, isize) {
+    let ret: isize = syscall(SYS_RT_SIGSUSPEND, mask, sigsetsize)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// sigaltstack - Set and/or get signal stack context
+func sigaltstack(ss: *StackT, old_ss: *StackT) (isize, isize) {
+    let ret: isize = syscall(SYS_SIGALTSTACK, ss, old_ss)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// pause - Wait for signal
+func pause() (isize, isize) {
+    let ret: isize = syscall(SYS_PAUSE)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}

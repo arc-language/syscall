@@ -1,0 +1,300 @@
+// /src/syscall/platform/filesystem.ax
+namespace syscall
+
+// =============================================================================
+// Filesystem Operations
+// =============================================================================
+
+// stat - Get file status
+func stat(pathname: string, statbuf: *Stat) (isize, isize) {
+    let ret: isize = syscall(SYS_STAT, pathname, statbuf)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// fstat - Get file status from file descriptor
+func fstat(fd: int32, statbuf: *Stat) (isize, isize) {
+    let ret: isize = syscall(SYS_FSTAT, fd, statbuf)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// lstat - Get file status (don't follow symlinks)
+func lstat(pathname: string, statbuf: *Stat) (isize, isize) {
+    let ret: isize = syscall(SYS_LSTAT, pathname, statbuf)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// statfs - Get filesystem statistics
+func statfs(path: string, buf: *StatFS) (isize, isize) {
+    let ret: isize = syscall(SYS_STATFS, path, buf)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// fstatfs - Get filesystem statistics from file descriptor
+func fstatfs(fd: int32, buf: *StatFS) (isize, isize) {
+    let ret: isize = syscall(SYS_FSTATFS, fd, buf)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// access - Check user's permissions for a file
+func access(pathname: string, mode: int32) (isize, isize) {
+    let ret: isize = syscall(SYS_ACCESS, pathname, mode)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// getcwd - Get current working directory
+func getcwd(buf: *byte, size: usize) (isize, isize) {
+    let ret: isize = syscall(SYS_GETCWD, buf, size)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (ret, 0)
+}
+
+// chdir - Change working directory
+func chdir(path: string) (isize, isize) {
+    let ret: isize = syscall(SYS_CHDIR, path)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// fchdir - Change working directory to open file descriptor
+func fchdir(fd: int32) (isize, isize) {
+    let ret: isize = syscall(SYS_FCHDIR, fd)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// mkdir - Create a directory
+func mkdir(pathname: string, mode: int32) (isize, isize) {
+    let ret: isize = syscall(SYS_MKDIR, pathname, mode)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// mkdirat - Create directory relative to directory fd
+func mkdirat(dirfd: int32, pathname: string, mode: int32) (isize, isize) {
+    let ret: isize = syscall(SYS_MKDIRAT, dirfd, pathname, mode)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// rmdir - Remove a directory
+func rmdir(pathname: string) (isize, isize) {
+    let ret: isize = syscall(SYS_RMDIR, pathname)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// unlink - Delete a file
+func unlink(pathname: string) (isize, isize) {
+    let ret: isize = syscall(SYS_UNLINK, pathname)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// unlinkat - Delete a name relative to directory fd
+func unlinkat(dirfd: int32, pathname: string, flags: int32) (isize, isize) {
+    let ret: isize = syscall(SYS_UNLINKAT, dirfd, pathname, flags)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// rename - Rename a file
+func rename(oldpath: string, newpath: string) (isize, isize) {
+    let ret: isize = syscall(SYS_RENAME, oldpath, newpath)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// renameat - Rename file relative to directory fds
+func renameat(olddirfd: int32, oldpath: string, newdirfd: int32, newpath: string) (isize, isize) {
+    let ret: isize = syscall(SYS_RENAMEAT, olddirfd, oldpath, newdirfd, newpath)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// renameat2 - Rename with flags
+func renameat2(olddirfd: int32, oldpath: string, newdirfd: int32, newpath: string, flags: uint32) (isize, isize) {
+    let ret: isize = syscall(SYS_RENAMEAT2, olddirfd, oldpath, newdirfd, newpath, flags)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// link - Create a hard link
+func link(oldpath: string, newpath: string) (isize, isize) {
+    let ret: isize = syscall(SYS_LINK, oldpath, newpath)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// linkat - Create hard link relative to directory fds
+func linkat(olddirfd: int32, oldpath: string, newdirfd: int32, newpath: string, flags: int32) (isize, isize) {
+    let ret: isize = syscall(SYS_LINKAT, olddirfd, oldpath, newdirfd, newpath, flags)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// symlink - Create a symbolic link
+func symlink(target: string, linkpath: string) (isize, isize) {
+    let ret: isize = syscall(SYS_SYMLINK, target, linkpath)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// symlinkat - Create symbolic link relative to directory fd
+func symlinkat(target: string, newdirfd: int32, linkpath: string) (isize, isize) {
+    let ret: isize = syscall(SYS_SYMLINKAT, target, newdirfd, linkpath)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// readlink - Read value of a symbolic link
+func readlink(pathname: string, buf: *byte, bufsiz: usize) (isize, isize) {
+    let ret: isize = syscall(SYS_READLINK, pathname, buf, bufsiz)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (ret, 0)
+}
+
+// readlinkat - Read symbolic link relative to directory fd
+func readlinkat(dirfd: int32, pathname: string, buf: *byte, bufsiz: usize) (isize, isize) {
+    let ret: isize = syscall(SYS_READLINKAT, dirfd, pathname, buf, bufsiz)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (ret, 0)
+}
+
+// chmod - Change file permissions
+func chmod(pathname: string, mode: int32) (isize, isize) {
+    let ret: isize = syscall(SYS_CHMOD, pathname, mode)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// fchmod - Change permissions of open file
+func fchmod(fd: int32, mode: int32) (isize, isize) {
+    let ret: isize = syscall(SYS_FCHMOD, fd, mode)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// fchmodat - Change permissions relative to directory fd
+func fchmodat(dirfd: int32, pathname: string, mode: int32, flags: int32) (isize, isize) {
+    let ret: isize = syscall(SYS_FCHMODAT, dirfd, pathname, mode, flags)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// chown - Change file owner and group
+func chown(pathname: string, owner: int32, group: int32) (isize, isize) {
+    let ret: isize = syscall(SYS_CHOWN, pathname, owner, group)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// fchown - Change owner of open file
+func fchown(fd: int32, owner: int32, group: int32) (isize, isize) {
+    let ret: isize = syscall(SYS_FCHOWN, fd, owner, group)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// lchown - Change owner (don't follow symlinks)
+func lchown(pathname: string, owner: int32, group: int32) (isize, isize) {
+    let ret: isize = syscall(SYS_LCHOWN, pathname, owner, group)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// fchownat - Change owner relative to directory fd
+func fchownat(dirfd: int32, pathname: string, owner: int32, group: int32, flags: int32) (isize, isize) {
+    let ret: isize = syscall(SYS_FCHOWNAT, dirfd, pathname, owner, group, flags)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
+
+// umask - Set file mode creation mask
+func umask(mask: int32) int32 {
+    let ret: isize = syscall(SYS_UMASK, mask)
+    return ret
+}
+
+// getdents64 - Get directory entries
+func getdents64(fd: int32, dirp: *Dirent64, count: usize) (isize, isize) {
+    let ret: isize = syscall(SYS_GETDENTS64, fd, dirp, count)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (ret, 0)
+}
+
+// chroot - Change root directory
+func chroot(path: string) (isize, isize) {
+    let ret: isize = syscall(SYS_CHROOT, path)
+    if (ret < 0) {
+        return (-1, -ret)
+    }
+    return (0, 0)
+}
