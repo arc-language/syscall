@@ -1,7 +1,7 @@
 // tcp_server.ax
 namespace main
 
-import "syscall/linux_amd64"
+import "github.com/arc-language/syscall/linux/amd64"
 
 extern c {
     func printf(fmt: *byte, ...) int32
