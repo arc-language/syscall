@@ -1,0 +1,56 @@
+// main.ax
+namespace main
+
+import "github.com/arc-language/syscall/linux/amd64"
+
+// Declare functions from libc
+extern c {
+    func printf(*byte, ...) int32
+}
+
+func main() int32 {
+    // Cast string literals to *byte for C compatibility
+    printf("Parent: Forking process...\n")
+
+    let (child_pid, fork_err) = syscall.fork()
+    
+    if (fork_err != 0) {
+        printf("Parent: Fork failed! Error: %d\n", fork_err)
+        return 1
+    }
+    
+    if (child_pid == 0) {
+        // --- CHILD PROCESS ---
+        printf("Child: Process started. Executing /bin/ls...\n")
+        
+        let cmd: string = "/bin/ls"
+        let argv: [2]string = {cmd, null}
+        let envp: *string = null
+        
+        // Execute
+        syscall.execve(cmd, &argv[0], envp)
+        
+        // We only reach here if execve fails
+        printf("Child: Execve failed!\n")
+        syscall.exit(1)
+    }
+    
+    // --- PARENT PROCESS ---
+    printf("Parent: Waiting for child PID %d...\n", child_pid)
+    
+    let status: int32 = 0
+    let (waited_pid, wait_err) = syscall.wait4(child_pid, &status, 0, null)
+    
+    if (wait_err != 0) {
+        printf("Parent: Wait4 failed!\n")
+        return 1
+    }
+    
+    if (status == 0) {
+        printf("Parent: Child finished successfully.\n")
+        return 0
+    }
+    
+    printf("Parent: Child exited with status %d\n", status)
+    return 1
+}
