@@ -2,7 +2,7 @@
 
 This repository contains the core low-level system call interfaces for the **Arc programming language**. It serves as the foundation for the Arc standard library, providing the necessary primitives to interact with the underlying operating system kernel.
 
-## 🌍 Platform Support
+## Platform Support
 
 This package is designed to house system call implementations for all supported operating systems and architectures. It abstracts the specific Kernel ABI mechanisms while exposing direct access to system resources.
 
@@ -14,7 +14,7 @@ Planned and supported platforms include:
 
 *Currently, the examples below demonstrate the **Linux/AMD64** implementation.*
 
-## 📦 Design & Pattern
+## Design & Pattern
 
 ### Return Values
 Unlike C, where `errno` is a thread-local global, system calls in this package use a tuple return pattern. Functions return the **result** and the **error code** directly.
@@ -29,7 +29,7 @@ Unlike C, where `errno` is a thread-local global, system calls in this package u
 ### Data Structures
 Kernel structures (such as `TimeSpec`, `Stat`, `SockAddr`) are defined as native Arc structs, ensuring memory layout compatibility with the operating system.
 
-## 🚀 Examples (Linux AMD64)
+## Examples (Linux AMD64)
 
 ### 1. Basic File I/O
 Writing directly to Standard Output (File Descriptor 1).
@@ -127,7 +127,7 @@ func main() int32 {
 }
 ```
 
-## 📂 Capability Summary
+## Capability Summary
 
 This module provides comprehensive access to kernel subsystems:
 
