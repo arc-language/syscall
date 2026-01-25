@@ -4,7 +4,7 @@ namespace main
 import "github.com/arc-language/syscall/linux/amd64"
 
 extern c {
-    func printf(fmt: *byte, ...) int32
+    func printf(*byte, ...) int32
 }
 
 func main() int32 {
