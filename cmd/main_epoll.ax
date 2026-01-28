@@ -1,0 +1,200 @@
+// main_epoll.ax
+namespace main
+
+// =============================================================================
+// Struct definitions
+// =============================================================================
+
+struct SockAddr {}
+
+@packed
+struct EpollEvent {
+    events: uint32
+    data: uint64
+}
+
+// =============================================================================
+// Constants
+// =============================================================================
+
+const AF_INET: int32 = 2
+const SOCK_STREAM: int32 = 1
+const SOL_SOCKET: int32 = 1
+const SO_REUSEADDR: int32 = 2
+const O_NONBLOCK: int32 = 2048
+const F_SETFL: int32 = 4
+
+const EPOLLIN: uint32 = 1
+const EPOLL_CTL_ADD: int32 = 1
+const EPOLL_CTL_DEL: int32 = 2
+
+// =============================================================================
+// External C functions
+// =============================================================================
+
+extern c {
+    func socket(int32, int32, int32) int32
+    func bind(int32, *SockAddr, int32) int32
+    func listen(int32, int32) int32
+    func accept(int32, *SockAddr, *int32) int32
+    func setsockopt(int32, int32, int32, *byte, int32) int32
+    func fcntl(int32, int32, int32) int32
+    func epoll_create1(int32) int32
+    func epoll_ctl(int32, int32, int32, *EpollEvent) int32
+    func epoll_wait(int32, *EpollEvent, int32, int32) int32
+    func read(int32, *byte, usize) isize
+    func write(int32, *byte, usize) isize
+    func close(int32) int32
+    func printf(*byte, ...) int32
+    func strlen(*byte) usize
+}
+
+// =============================================================================
+// Helper functions
+// =============================================================================
+
+func print(msg: string) void {
+    write(1, cast<*byte>(msg), strlen(cast<*byte>(msg)))
+}
+
+// =============================================================================
+// Main
+// =============================================================================
+
+func main() int32 {
+    print("=== Arc Epoll HTTP Server ===\n")
+    
+    // 1. Create socket
+    let sockfd = socket(AF_INET, SOCK_STREAM, 0)
+    if sockfd < 0 {
+        print("Failed to create socket\n")
+        return 1
+    }
+    
+    printf("sockfd = %d\n", sockfd)
+    
+    // 2. Set SO_REUSEADDR
+    let optval: int32 = 1
+    setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, cast<*byte>(&optval), 4)
+    
+    // 3. Set non-blocking
+    fcntl(sockfd, F_SETFL, O_NONBLOCK)
+    
+    // 4. Bind to port 8080
+    let addr_bytes: [16]byte = {
+        2, 0,           // AF_INET
+        0x1F, 0x90,     // Port 8080 (big endian)
+        0, 0, 0, 0,     // 0.0.0.0
+        0, 0, 0, 0, 0, 0, 0, 0
+    }
+    
+    let addr_ptr = cast<*SockAddr>(&addr_bytes[0])
+    
+    if bind(sockfd, addr_ptr, 16) < 0 {
+        print("Failed to bind\n")
+        return 1
+    }
+    print("Bound to port 8080\n")
+    
+    // 5. Listen
+    if listen(sockfd, 4096) < 0 {
+        print("Failed to listen\n")
+        return 1
+    }
+    print("Listening for connections...\n")
+    
+    // 6. Create epoll
+    let epfd = epoll_create1(0)
+    if epfd < 0 {
+        print("Failed to create epoll\n")
+        return 1
+    }
+    
+    // 7. Add listen socket to epoll
+    let ev: EpollEvent = {}
+    ev.events = EPOLLIN
+    ev.data = cast<uint64>(sockfd)
+    
+    printf("Adding sockfd %d to epoll, ev.events=%u ev.data=%lu\n", sockfd, ev.events, ev.data)
+    
+    if epoll_ctl(epfd, EPOLL_CTL_ADD, sockfd, &ev) < 0 {
+        print("Failed to add to epoll\n")
+        return 1
+    }
+    
+    // 8. Event loop
+    let events: [128]EpollEvent = {}
+    let buffer: [4096]byte = {}
+    let response: string = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 13\r\nConnection: close\r\n\r\nHello, World!\n"
+    
+    for {
+        let nfds = epoll_wait(epfd, &events[0], 128, -1)
+        
+        //printf("epoll_wait returned %d events\n", nfds)
+        
+        if nfds <= 0 {
+            continue
+        }
+        
+        let i: int32 = 0
+        for i < nfds {
+            let evt = events[i]
+            let fd = cast<int32>(evt.data)
+            
+            //printf("Event %d: fd=%d events=0x%x sockfd=%d\n", i, fd, evt.events, sockfd)
+            
+            let diff = fd - sockfd
+            
+            if diff == 0 {
+                // Accept ALL pending connections
+                //print("Accepting connections...\n")
+                for {
+                    let conn_fd = accept(sockfd, null, null)
+                    
+                    //printf("accept returned %d\n", conn_fd)
+                    
+                    if conn_fd < 0 {
+                        break
+                    }
+                    
+                    // Set non-blocking
+                    fcntl(conn_fd, F_SETFL, O_NONBLOCK)
+                    
+                    // Add to epoll
+                    let conn_ev: EpollEvent = {}
+                    conn_ev.events = EPOLLIN
+                    conn_ev.data = cast<uint64>(conn_fd)
+                    
+                    //printf("Adding conn_fd %d to epoll\n", conn_fd)
+                    
+                    epoll_ctl(epfd, EPOLL_CTL_ADD, conn_fd, &conn_ev)
+                }
+            } else {
+                // Handle client connection
+                //printf("Handling client fd %d\n", fd)
+                
+                // Read ALL data
+                for {
+                    let n = read(fd, &buffer[0], 4096)
+                    //printf("read returned %ld\n", n)
+                    if n <= 0 {
+                        break
+                    }
+                }
+                
+                // Send response
+                let w = write(fd, cast<*byte>(response), 100)
+                //printf("write returned %ld\n", w)
+                
+                // Remove from epoll and close
+                epoll_ctl(epfd, EPOLL_CTL_DEL, fd, null)
+                close(fd)
+                //print("Client closed\n")
+            }
+            
+            i++
+        }
+    }
+    
+    return 0
+}

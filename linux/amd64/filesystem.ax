@@ -1,4 +1,3 @@
-// /src/syscall/platform/filesystem.ax
 namespace syscall
 
 // =============================================================================
