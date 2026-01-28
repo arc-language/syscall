@@ -1,0 +1,40 @@
+// Define interface matching C++
+extern cpp {
+    namespace Math {
+        // 1. Simple Function
+        func Add(int32, int32) int32
+
+        // 2. Overloading
+        func Add(float32, float32) float32
+
+        class Vector3 {
+            // 4. Non-virtual Method
+            // Grammar forces 'self *Identifier'
+            func Length(self *Vector3) float32
+
+            // 5. Static Method
+            // Return type can be qualified
+            static func Zero() Math.Vector3
+        }
+    }
+}
+
+extern c {
+    func printf(*byte, ...) int32
+    // Use qualified name here too
+    func CreateVector(float32, float32, float32) *Math.Vector3
+}
+
+func main() {
+    printf("[Arc] Starting Mangling Test...\n")
+
+    let sum = Math.Add(10, 20)
+    printf("[Arc] Math.Add(int) = %d\n", sum)
+
+    let fsum = Math.Add(1.5, 2.5)
+    printf("[Arc] Math.Add(float) = %f\n", fsum)
+
+    let vec = CreateVector(1.0, 2.0, 3.0)
+    let lenSq = vec.Length()
+    printf("[Arc] Vector LengthSq = %f\n", lenSq)
+}

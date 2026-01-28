@@ -1,0 +1,49 @@
+namespace main
+
+extern c {
+    func fopen(path: *byte, mode: *byte) *void
+    func fclose(stream: *void) int32
+    func fputs(str: *byte, stream: *void) int32
+    func printf(*byte, ...) int32
+}
+
+class File {
+    handle: *void
+
+    // Constructor (Pseudo-code, you'd usually have a static func or init)
+    // Let's say you init fields manually for now or via a factory func
+    
+    func write(self f: *File, msg: *byte) {
+        fputs(msg, f.handle)
+    }
+
+    // The Destructor
+    deinit(self f: *File) {
+        // 1. Clean up the external C resource
+        if f.handle != null {
+            printf("Closing file handle...\n")
+            fclose(f.handle)
+        }
+        
+        // 2. The compiler will automatically free 'f' (the object memory) immediately after this block.
+    }
+}
+
+func main() int32 {
+    // 1. Create object (Ref Count = 1)
+    let f = File{ 
+        handle: fopen("test.txt", "w") 
+    }
+
+    // 2. Use it
+    for i in 1..10 {
+        f.write("Adding a line \n")
+    }
+
+    // 3. End of Scope
+    // -> Ref Count becomes 0
+    // -> Compiler calls f.deinit() -> "Closing file handle..."
+    // -> Compiler calls free(f)
+    
+    return 0
+}

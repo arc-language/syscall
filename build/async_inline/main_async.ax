@@ -1,0 +1,22 @@
+namespace main
+
+extern c {
+    func printf(*byte, ...) int32
+    func sleep(int32) int32
+}
+
+func main() int32 { 
+
+    let x = 100
+    let m = 1000
+
+    for e in 1..10 { 
+        async func(g: int32, q: int32) {
+            sleep(1) 
+            printf("async func: g =%d q =%d\n", g, q)
+        }(e, m) 
+    } 
+    
+    sleep(10)
+    return 0
+}

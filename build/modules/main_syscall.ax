@@ -1,0 +1,15 @@
+// 
+namespace main
+
+import "module2"
+
+func main() int32 {
+
+    let len = module2.get_value2()
+
+    if len == 50 {
+        module2.printf("looks good\n")
+    }
+
+    return 0
+}

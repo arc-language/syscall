@@ -1,0 +1,14 @@
+namespace main
+
+extern c {
+    func printf(*byte, ...) int32
+}
+
+func main() int32 {
+
+    for i in 1..10 {
+        printf("Adding a line \n")
+    }
+
+    return 0
+}

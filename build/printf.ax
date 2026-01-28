@@ -1,0 +1,16 @@
+
+namespace main
+
+// sample printf.arc 
+extern c {
+    func printf(*byte, ...) int32
+}
+
+func main() int32 {
+
+    let result: int32 = 100
+
+    printf("result=%d\n", result)
+
+    return 0
+}

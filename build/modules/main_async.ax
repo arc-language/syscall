@@ -1,0 +1,30 @@
+namespace main
+
+extern c {
+    func printf(*byte, ...) int32
+    func sleep(int32) int32
+}
+
+async func example_task() int32 {
+    let x = 100
+    printf("  [Task 1] Working (sleeping 2s)...\n")
+    sleep(2)
+    printf("  [Task 1] Done.\n")
+    return x
+}
+
+async func example_task2() int32 {
+    printf(" [Task 2] Waiting for Task 1...\n")
+    let result = await example_task() 
+    printf(" [Task 2] Task 1 returned: %d\n", result)
+    return 0
+}
+
+func main() int32 {
+    printf("[Main] Spawning Task 2...\n")
+    example_task2()
+    printf("[Main] Task 2 spawned. Sleeping to keep process alive.\n")
+    sleep(4)
+    printf("[Main] Exiting.\n")
+    return 0
+}

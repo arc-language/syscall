@@ -1,0 +1,24 @@
+@.str.0 = external constant [12 x i8] [i8 108, i8 111, i8 111, i8 107, i8 115, i8 32, i8 103, i8 111, i8 111, i8 100, i8 10, i8 0]
+
+define external ccc i32 @main() {
+entry:
+  %len.addr = alloca i32
+  %0 = call ccc i32 @module2_get_value2()
+  store i32 %0, ptr<i32> %len.addr
+  %1 = load i32, ptr<i32> %len.addr
+  %2 = icmp eq i32 %1, 50
+  br i1 %2, label %if.then.0, label %if.end
+if.end:
+  ret i32 0
+if.then.0:
+  %3 = getelementptr inbounds [12 x i8], ptr<[12 x i8]> @.str.0, i32 0, i32 0
+  call ccc void @printf(ptr<i8> %3)
+  br label %if.end
+}
+
+declare external ccc void @printf(ptr<u8>, ...)
+
+define external ccc i32 @module2_get_value2() {
+entry:
+  ret i32 50
+}

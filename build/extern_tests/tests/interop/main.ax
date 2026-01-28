@@ -1,0 +1,47 @@
+// tests/interop/main.arc
+namespace main
+
+// 1. Define the C++ Class Interface
+// The compiler maps 'virtual' methods to vtable lookups.
+extern cpp {
+    class CppCalculator {
+        // Index 0 in Itanium ABI (if no virtual dtor)
+        virtual func Add(self *CppCalculator, a: int32, b: int32) int32
+        
+        // Index 1
+        virtual func Sub(self *CppCalculator, a: int32, b: int32) int32
+    }
+}
+
+// 2. Define C Factories and Standard Lib
+extern c {
+    func CreateCalculator() *CppCalculator
+    func DestroyCalculator(*CppCalculator) void
+    func printf(*byte, ...) int32
+}
+
+func main() {
+    printf("[Arc] Starting C++ Interop Test...\n")
+
+    // 1. Instantiate C++ Object via C factory
+    let calc = CreateCalculator()
+    
+    // 2. Call Virtual Method (VTable Lookup)
+    // This should print "[C++] Add(10, 20) called"
+    let sum = calc.Add(10, 20)
+    printf("[Arc] Result: %d\n", sum)
+
+    if sum != 30 {
+        printf("[Arc] ERROR: Expected 30\n")
+        // exit(1) // syscall exit
+    }
+
+    // 3. Call another Virtual Method
+    let diff = calc.Sub(100, 42)
+    printf("[Arc] Result: %d\n", diff)
+
+    // 4. Cleanup
+    DestroyCalculator(calc)
+    
+    printf("[Arc] Test Passed.\n")
+}

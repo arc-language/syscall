@@ -1,0 +1,25 @@
+namespace main
+
+extern c {
+    func printf(*byte, ...) int32
+    func sleep(int32) int32
+}
+
+func main() int32 { 
+
+    let y = 100
+    let m = 1000
+
+    for x in 1..10 {
+        process func(g: int32, q: int32) {
+            for s in 1..10 {
+                printf("process func: s =%d q =%d\n", s, q)
+                sleep(1) 
+            }
+
+        }(x, m) 
+    }
+    
+    sleep(14)
+    return 0
+}

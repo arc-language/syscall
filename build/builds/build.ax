@@ -1,0 +1,14 @@
+
+// ../arc build main.ax -o main -L /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/ -l c -v
+namespace build
+
+extern c {
+    func printf(*byte, ...) int32
+}
+
+func main() int32 {
+
+    printf("build .. ok\n")
+
+    return 0
+}

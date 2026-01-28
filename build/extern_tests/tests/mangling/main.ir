@@ -1,0 +1,45 @@
+@.str.0 = external constant [33 x i8] [i8 91, i8 65, i8 114, i8 99, i8 93, i8 32, i8 83, i8 116, i8 97, i8 114, i8 116, i8 105, i8 110, i8 103, i8 32, i8 77, i8 97, i8 110, i8 103, i8 108, i8 105, i8 110, i8 103, i8 32, i8 84, i8 101, i8 115, i8 116, i8 46, i8 46, i8 46, i8 10, i8 0]
+@.str.1 = external constant [26 x i8] [i8 91, i8 65, i8 114, i8 99, i8 93, i8 32, i8 77, i8 97, i8 116, i8 104, i8 46, i8 65, i8 100, i8 100, i8 40, i8 105, i8 110, i8 116, i8 41, i8 32, i8 61, i8 32, i8 37, i8 100, i8 10, i8 0]
+@.str.2 = external constant [28 x i8] [i8 91, i8 65, i8 114, i8 99, i8 93, i8 32, i8 77, i8 97, i8 116, i8 104, i8 46, i8 65, i8 100, i8 100, i8 40, i8 102, i8 108, i8 111, i8 97, i8 116, i8 41, i8 32, i8 61, i8 32, i8 37, i8 102, i8 10, i8 0]
+@.str.3 = external constant [28 x i8] [i8 91, i8 65, i8 114, i8 99, i8 93, i8 32, i8 86, i8 101, i8 99, i8 116, i8 111, i8 114, i8 32, i8 76, i8 101, i8 110, i8 103, i8 116, i8 104, i8 83, i8 113, i8 32, i8 61, i8 32, i8 37, i8 102, i8 10, i8 0]
+
+declare external ccc f32 @_ZN4Math3AddEff(f32, f32)
+
+declare external ccc f32 @_ZN4Math3AddEff(f32, f32)
+
+declare external ccc f32 @_ZN4Math7Vector36LengthEv(ptr<%Math.Vector3>)
+
+declare external ccc %Math.Vector3 @_ZN4Math7Vector34ZeroEv()
+
+declare external ccc i32 @printf(ptr<u8>, ...)
+
+declare external ccc ptr<i64> @CreateVector(f32, f32, f32)
+
+define external ccc void @main() {
+entry:
+  %0 = getelementptr inbounds [33 x i8], ptr<[33 x i8]> @.str.0, i32 0, i32 0
+  %1 = call ccc i32 @printf(ptr<i8> %0)
+  %sum.addr = alloca f32
+  %2 = call ccc f32 @_ZN4Math3AddEff(f32 10, f32 20)
+  store f32 %2, ptr<f32> %sum.addr
+  %3 = getelementptr inbounds [26 x i8], ptr<[26 x i8]> @.str.1, i32 0, i32 0
+  %4 = load f32, ptr<f32> %sum.addr
+  %5 = call ccc i32 @printf(ptr<i8> %3, f32 %4)
+  %fsum.addr = alloca f32
+  %6 = call ccc f32 @_ZN4Math3AddEff(f32 1.5, f32 2.5)
+  store f32 %6, ptr<f32> %fsum.addr
+  %7 = getelementptr inbounds [28 x i8], ptr<[28 x i8]> @.str.2, i32 0, i32 0
+  %8 = load f32, ptr<f32> %fsum.addr
+  %9 = call ccc i32 @printf(ptr<i8> %7, f32 %8)
+  %vec.addr = alloca ptr<%Math.Vector3>
+  %10 = call ccc ptr<i64> @CreateVector(f32 1, f32 2, f32 3)
+  store ptr<i64> %10, ptr<ptr<%Math.Vector3>> %vec.addr
+  %lenSq.addr = alloca f32
+  %11 = load ptr<%Math.Vector3>, ptr<ptr<%Math.Vector3>> %vec.addr
+  %12 = call ccc f32 @_ZN4Math7Vector36LengthEv(ptr<%Math.Vector3> %11)
+  store f32 %12, ptr<f32> %lenSq.addr
+  %13 = getelementptr inbounds [28 x i8], ptr<[28 x i8]> @.str.3, i32 0, i32 0
+  %14 = load f32, ptr<f32> %lenSq.addr
+  %15 = call ccc i32 @printf(ptr<i8> %13, f32 %14)
+  ret void
+}

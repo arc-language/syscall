@@ -1,0 +1,180 @@
+@.str.0 = external constant [39 x i8] [i8 91, i8 65, i8 115, i8 121, i8 110, i8 99, i8 93, i8 32, i8 65, i8 99, i8 99, i8 101, i8 112, i8 116, i8 101, i8 100, i8 32, i8 99, i8 111, i8 110, i8 110, i8 101, i8 99, i8 116, i8 105, i8 111, i8 110, i8 32, i8 111, i8 110, i8 32, i8 70, i8 68, i8 58, i8 32, i8 37, i8 100, i8 10, i8 0]
+@.str.1 = external constant [30 x i8] [i8 91, i8 65, i8 115, i8 121, i8 110, i8 99, i8 93, i8 32, i8 82, i8 101, i8 99, i8 101, i8 105, i8 118, i8 101, i8 100, i8 32, i8 114, i8 101, i8 113, i8 117, i8 101, i8 115, i8 116, i8 58, i8 10, i8 37, i8 115, i8 10, i8 0]
+@.str.2 = external constant [72 x i8] [i8 72, i8 84, i8 84, i8 80, i8 47, i8 49, i8 46, i8 49, i8 32, i8 50, i8 48, i8 48, i8 32, i8 79, i8 75, i8 13, i8 10, i8 67, i8 111, i8 110, i8 116, i8 101, i8 110, i8 116, i8 45, i8 84, i8 121, i8 112, i8 101, i8 58, i8 32, i8 116, i8 101, i8 120, i8 116, i8 47, i8 112, i8 108, i8 97, i8 105, i8 110, i8 13, i8 10, i8 13, i8 10, i8 72, i8 101, i8 108, i8 108, i8 111, i8 32, i8 102, i8 114, i8 111, i8 109, i8 32, i8 65, i8 114, i8 99, i8 32, i8 65, i8 115, i8 121, i8 110, i8 99, i8 32, i8 84, i8 67, i8 80, i8 33, i8 10, i8 0]
+@.str.3 = external constant [23 x i8] [i8 91, i8 65, i8 115, i8 121, i8 110, i8 99, i8 93, i8 32, i8 67, i8 108, i8 111, i8 115, i8 101, i8 100, i8 32, i8 70, i8 68, i8 58, i8 32, i8 37, i8 100, i8 10, i8 0]
+@.str.4 = external constant [25 x i8] [i8 70, i8 97, i8 105, i8 108, i8 101, i8 100, i8 32, i8 116, i8 111, i8 32, i8 99, i8 114, i8 101, i8 97, i8 116, i8 101, i8 32, i8 115, i8 111, i8 99, i8 107, i8 101, i8 116, i8 10, i8 0]
+@.str.5 = external constant [27 x i8] [i8 70, i8 97, i8 105, i8 108, i8 101, i8 100, i8 32, i8 116, i8 111, i8 32, i8 98, i8 105, i8 110, i8 100, i8 32, i8 116, i8 111, i8 32, i8 112, i8 111, i8 114, i8 116, i8 32, i8 37, i8 100, i8 10, i8 0]
+@.str.6 = external constant [18 x i8] [i8 70, i8 97, i8 105, i8 108, i8 101, i8 100, i8 32, i8 116, i8 111, i8 32, i8 108, i8 105, i8 115, i8 116, i8 101, i8 110, i8 10, i8 0]
+@.str.7 = external constant [41 x i8] [i8 83, i8 101, i8 114, i8 118, i8 101, i8 114, i8 32, i8 108, i8 105, i8 115, i8 116, i8 101, i8 110, i8 105, i8 110, i8 103, i8 32, i8 111, i8 110, i8 32, i8 104, i8 116, i8 116, i8 112, i8 58, i8 47, i8 47, i8 108, i8 111, i8 99, i8 97, i8 108, i8 104, i8 111, i8 115, i8 116, i8 58, i8 37, i8 100, i8 10, i8 0]
+@.str.8 = external constant [15 x i8] [i8 65, i8 99, i8 99, i8 101, i8 112, i8 116, i8 32, i8 102, i8 97, i8 105, i8 108, i8 101, i8 100, i8 10, i8 0]
+
+declare external ccc i32 @socket(i32, i32, i32)
+
+declare external ccc i32 @setsockopt(i32, i32, i32, ptr<void>, i32)
+
+declare external ccc i32 @bind(i32, ptr<void>, i32)
+
+declare external ccc i32 @listen(i32, i32)
+
+declare external ccc i32 @accept(i32, ptr<void>, ptr<i32>)
+
+declare external ccc i64 @read(i32, ptr<void>, u64)
+
+declare external ccc i64 @write(i32, ptr<void>, u64)
+
+declare external ccc i32 @close(i32)
+
+declare external ccc i32 @printf(ptr<u8>, ...)
+
+define external ccc void @main_handle_client(i32 %fd) {
+entry:
+  %fd.addr = alloca i32
+  store i32 %fd, ptr<i32> %fd.addr
+  %0 = getelementptr inbounds [39 x i8], ptr<[39 x i8]> @.str.0, i32 0, i32 0
+  %1 = load i32, ptr<i32> %fd.addr
+  %2 = bitcast ptr<i8> %0 to ptr<u8>
+  %3 = call ccc i32 @printf(ptr<u8> %2, i32 %1)
+  %buffer.addr = alloca [1024 x u8]
+  store [1024 x u8] [1024 x u8] [u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0], ptr<[1024 x u8]> %buffer.addr
+  %4 = getelementptr inbounds [1024 x u8], ptr<[1024 x u8]> %buffer.addr, i32 0, i64 0
+  %ptr.addr = alloca ptr<u8>
+  store ptr<u8> %4, ptr<ptr<u8>> %ptr.addr
+  %5 = load i32, ptr<i32> %fd.addr
+  %6 = load ptr<u8>, ptr<ptr<u8>> %ptr.addr
+  %7 = bitcast ptr<u8> %6 to ptr<void>
+  %8 = call ccc i64 @read(i32 %5, ptr<void> %7, u64 1024)
+  %n.addr = alloca i64
+  store i64 %8, ptr<i64> %n.addr
+  %9 = load i64, ptr<i64> %n.addr
+  %10 = icmp sgt i64 %9, 0
+  br i1 %10, label %if.then.0, label %if.end
+if.end:
+  %25 = load i32, ptr<i32> %fd.addr
+  %26 = call ccc i32 @close(i32 %25)
+  %27 = getelementptr inbounds [23 x i8], ptr<[23 x i8]> @.str.3, i32 0, i32 0
+  %28 = load i32, ptr<i32> %fd.addr
+  %29 = bitcast ptr<i8> %27 to ptr<u8>
+  %30 = call ccc i32 @printf(ptr<u8> %29, i32 %28)
+  ret void
+if.then.0:
+  %11 = load i64, ptr<i64> %n.addr
+  %12 = sext i64 %11 to u64
+  %13 = icmp slt u64 %12, 1024
+  br i1 %13, label %if.then.0, label %if.end
+if.end:
+  %16 = getelementptr inbounds [30 x i8], ptr<[30 x i8]> @.str.1, i32 0, i32 0
+  %17 = load ptr<u8>, ptr<ptr<u8>> %ptr.addr
+  %18 = bitcast ptr<i8> %16 to ptr<u8>
+  %19 = call ccc i32 @printf(ptr<u8> %18, ptr<u8> %17)
+  %20 = getelementptr inbounds [72 x i8], ptr<[72 x i8]> @.str.2, i32 0, i32 0
+  %response.addr = alloca ptr<i8>
+  store ptr<i8> %20, ptr<ptr<i8>> %response.addr
+  %21 = load i32, ptr<i32> %fd.addr
+  %22 = load ptr<i8>, ptr<ptr<i8>> %response.addr
+  %23 = bitcast ptr<i8> %22 to ptr<void>
+  %24 = call ccc i64 @write(i32 %21, ptr<void> %23, u64 74)
+  br label %if.end
+if.then.0:
+  %14 = load i64, ptr<i64> %n.addr
+  %15 = getelementptr inbounds [1024 x u8], ptr<[1024 x u8]> %buffer.addr, i32 0, i64 %14
+  store u8 0, ptr<u8> %15
+  br label %if.end
+}
+
+define external ccc i32 @main() {
+entry:
+  %port.addr = alloca i32
+  store i32 8080, ptr<i32> %port.addr
+  %31 = call ccc i32 @socket(i32 2, i32 1, i32 0)
+  %sockfd.addr = alloca i32
+  store i32 %31, ptr<i32> %sockfd.addr
+  %32 = load i32, ptr<i32> %sockfd.addr
+  %33 = icmp slt i32 %32, 0
+  br i1 %33, label %if.then.0, label %if.end
+if.end:
+  %opt.addr = alloca i32
+  store i32 1, ptr<i32> %opt.addr
+  %37 = load i32, ptr<i32> %sockfd.addr
+  %38 = bitcast ptr<i32> %opt.addr to ptr<void>
+  %39 = call ccc i32 @setsockopt(i32 %37, i32 1, i32 2, ptr<void> %38, i32 4)
+  %addr_data.addr = alloca [16 x u8]
+  store [16 x u8] [16 x u8] [u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0], ptr<[16 x u8]> %addr_data.addr
+  %40 = getelementptr inbounds [16 x u8], ptr<[16 x u8]> %addr_data.addr, i32 0, i64 0
+  %raw_ptr.addr = alloca ptr<u8>
+  store ptr<u8> %40, ptr<ptr<u8>> %raw_ptr.addr
+  %41 = load ptr<u8>, ptr<ptr<u8>> %raw_ptr.addr
+  %42 = bitcast ptr<u8> %41 to ptr<i16>
+  %family_ptr.addr = alloca ptr<i16>
+  store ptr<i16> %42, ptr<ptr<i16>> %family_ptr.addr
+  %43 = load ptr<i16>, ptr<ptr<i16>> %family_ptr.addr
+  store i16 2, ptr<i16> %43
+  %44 = load ptr<u8>, ptr<ptr<u8>> %raw_ptr.addr
+  %45 = getelementptr inbounds u8, ptr<u8> %44, i64 2
+  %46 = bitcast ptr<u8> %45 to ptr<u16>
+  %port_ptr.addr = alloca ptr<u16>
+  store ptr<u16> %46, ptr<ptr<u16>> %port_ptr.addr
+  %47 = load ptr<u16>, ptr<ptr<u16>> %port_ptr.addr
+  store u16 36895, ptr<u16> %47
+  %48 = load i32, ptr<i32> %sockfd.addr
+  %49 = load ptr<u8>, ptr<ptr<u8>> %raw_ptr.addr
+  %50 = bitcast ptr<u8> %49 to ptr<void>
+  %51 = call ccc i32 @bind(i32 %48, ptr<void> %50, i32 16)
+  %52 = icmp slt i32 %51, 0
+  br i1 %52, label %if.then.0, label %if.end
+if.then.0:
+  %34 = getelementptr inbounds [25 x i8], ptr<[25 x i8]> @.str.4, i32 0, i32 0
+  %35 = bitcast ptr<i8> %34 to ptr<u8>
+  %36 = call ccc i32 @printf(ptr<u8> %35)
+  ret i32 1
+if.end:
+  %57 = load i32, ptr<i32> %sockfd.addr
+  %58 = call ccc i32 @listen(i32 %57, i32 10)
+  %59 = icmp slt i32 %58, 0
+  br i1 %59, label %if.then.0, label %if.end
+if.then.0:
+  %53 = getelementptr inbounds [27 x i8], ptr<[27 x i8]> @.str.5, i32 0, i32 0
+  %54 = load i32, ptr<i32> %port.addr
+  %55 = bitcast ptr<i8> %53 to ptr<u8>
+  %56 = call ccc i32 @printf(ptr<u8> %55, i32 %54)
+  ret i32 1
+if.end:
+  %63 = getelementptr inbounds [41 x i8], ptr<[41 x i8]> @.str.7, i32 0, i32 0
+  %64 = load i32, ptr<i32> %port.addr
+  %65 = bitcast ptr<i8> %63 to ptr<u8>
+  %66 = call ccc i32 @printf(ptr<u8> %65, i32 %64)
+  br label %loop.cond
+if.then.0:
+  %60 = getelementptr inbounds [18 x i8], ptr<[18 x i8]> @.str.6, i32 0, i32 0
+  %61 = bitcast ptr<i8> %60 to ptr<u8>
+  %62 = call ccc i32 @printf(ptr<u8> %61)
+  ret i32 1
+loop.cond:
+  br i1 1, label %loop.body, label %loop.end
+loop.body:
+  %client_data.addr = alloca [16 x u8]
+  store [16 x u8] [16 x u8] [u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0, u8 0], ptr<[16 x u8]> %client_data.addr
+  %client_len.addr = alloca i32
+  store i32 16, ptr<i32> %client_len.addr
+  %67 = load i32, ptr<i32> %sockfd.addr
+  %68 = getelementptr inbounds [16 x u8], ptr<[16 x u8]> %client_data.addr, i32 0, i64 0
+  %69 = bitcast ptr<u8> %68 to ptr<void>
+  %70 = call ccc i32 @accept(i32 %67, ptr<void> %69, ptr<i32> %client_len.addr)
+  %client_fd.addr = alloca i32
+  store i32 %70, ptr<i32> %client_fd.addr
+  %71 = load i32, ptr<i32> %client_fd.addr
+  %72 = icmp slt i32 %71, 0
+  br i1 %72, label %if.then.0, label %if.end
+loop.post:
+  br label %loop.cond
+loop.end:
+  ret i32 0
+if.end:
+  %76 = load i32, ptr<i32> %client_fd.addr
+  %77 = async_task_create @main_handle_client(i32 %76)
+  br label %loop.post
+if.then.0:
+  %73 = getelementptr inbounds [15 x i8], ptr<[15 x i8]> @.str.8, i32 0, i32 0
+  %74 = bitcast ptr<i8> %73 to ptr<u8>
+  %75 = call ccc i32 @printf(ptr<u8> %74)
+  br label %loop.post
+}

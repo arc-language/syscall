@@ -1,0 +1,86 @@
+namespace main
+
+// 1. Struct Definition
+//struct Config {
+  //  threshold: float32
+   // scale: float32
+//}
+
+// Constants
+const SIZE: int32 = 1024
+
+
+// 2. CPU Helper Function (Host)
+func prepare_data(val: int32) int32 {
+    // Bitwise operations (testing CPU ALU)
+    let mask = 0xFF
+    return (val & mask) << 2
+}
+
+// 3. GPU Kernel (Async + <gpu> tag)
+// The compiler should detect <gpu_rocm>, set CC_PTX, and route this to the Nvidia backend.
+async func gpu_kernel<gpu.rocm>(
+    data_ptr: *float32, 
+    result_ptr: *float32, 
+    n: int32
+    //cfg: *Config
+) {
+    // Local variable simulation (PTX .reg)
+    let idx = 0 
+    
+    // Control Flow: Basic Block generation test
+    if idx < n {
+        // Memory: Array Indexing (GetElementPtr -> Load)
+        // PTX: ld.f32
+        let val = data_ptr[idx]
+        
+        // Struct Access via Pointer
+        //let limit = cfg.threshold
+        //let multiplier = cfg.scale
+
+        // Comparison: Floating Point
+        // PTX: setp.gt.f32
+        if val > limit {
+            // Arithmetic: Float
+            // PTX: fmul, fadd
+            val = val * multiplier + 1.0
+        } else {
+            // Arithmetic: Float
+            // PTX: fsub
+            val = val - 1.0
+        }
+
+        // Memory: Store result
+        // PTX: st.f32
+        result_ptr[idx] = val
+    }
+}
+
+// 4. Main Entry Point
+func main() {
+
+    
+    // Struct Initialization
+    //let config = Config{
+     //   threshold: 0.5,
+    //    scale: 2.0
+    //}
+
+    // Dummy Pointers (representing device memory)
+    let dev_in: *float32 = null
+    let dev_out: *float32 = null
+
+    // CPU Logic Call
+    let host_val = prepare_data(10)
+
+    // Loop logic (CPU side)
+    let i = 0
+    for i < 5 {
+        i = i + 1
+    }
+
+    // Async Dispatch
+    // The compiler should generate a call to the GPU kernel here.
+    // In the IR, this returns a handle.
+    await gpu_kernel(dev_in, dev_out, SIZE)
+}

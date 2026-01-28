@@ -1,0 +1,11 @@
+// module2/index.arc
+namespace module2
+
+extern c {
+    func printf(*byte, ...)
+}
+
+func get_value2() int32 {
+
+    return 50
+}

@@ -1,0 +1,183 @@
+
+
+// ../arc build main_libevent.ax -o main_libevent -L /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/ -l c -l event -v 
+
+// sudo apt-get update
+// sudo apt-get install libevent-dev
+
+// main_libevent.ax
+// main_libevent.ax
+namespace main
+
+// =============================================================================
+// Struct definitions (C-compatible layout) - OUTSIDE extern c
+// =============================================================================
+
+struct event_base {}
+struct evconnlistener {}
+struct bufferevent {}
+struct sockaddr {}
+
+struct SockAddrIn {
+    sin_family: uint16
+    sin_port: uint16
+    sin_addr: uint32
+    sin_zero: [8]byte
+}
+
+// =============================================================================
+// Constants
+// =============================================================================
+
+const LEV_OPT_REUSEABLE: uint32 = 2
+const LEV_OPT_CLOSE_ON_FREE: uint32 = 4
+const BEV_OPT_CLOSE_ON_FREE: int32 = 1
+const EV_READ: int16 = 2
+const EV_WRITE: int16 = 4
+
+// =============================================================================
+// libevent C library bindings
+// =============================================================================
+
+extern c {
+    // Event base
+    func event_base_new() *event_base
+    func event_base_dispatch(*event_base) int32
+    func event_base_free(*event_base) void
+    
+    // Listener
+    func evconnlistener_new_bind(
+        *event_base,
+        func(*evconnlistener, int32, *sockaddr, int32, *void) void,
+        *void,
+        uint32,
+        int32,
+        *sockaddr,
+        int32
+    ) *evconnlistener
+    
+    func evconnlistener_free(*evconnlistener) void
+    
+    // Bufferevent
+    func bufferevent_socket_new(*event_base, int32, int32) *bufferevent
+    func bufferevent_setcb(
+        *bufferevent,
+        func(*bufferevent, *void) void,
+        func(*bufferevent, *void) void,
+        func(*bufferevent, int16, *void) void,
+        *void
+    ) void
+    func bufferevent_enable(*bufferevent, int16) int32
+    func bufferevent_write(*bufferevent, *void, usize) int32
+    func bufferevent_read(*bufferevent, *void, usize) usize
+    func bufferevent_free(*bufferevent) void
+    
+    // Standard C
+    func printf(*byte, ...) int32
+}
+
+// =============================================================================
+// Callbacks
+// =============================================================================
+
+// Called when we get a read event on a connection
+func on_read(bev: *bufferevent, ctx: *void) void {
+    let buffer: [1024]byte = {}
+    
+    // Read the request (we don't actually parse it)
+    let n = bufferevent_read(bev, &buffer[0], 1024)
+    
+    if n > 0 {
+        // Send hardcoded HTTP response
+        let response: string = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 25\r\nConnection: close\r\n\r\nHello from libevent + Arc!\n"
+        
+        bufferevent_write(bev, cast<*void>(response), 112)
+        
+        // Close the connection immediately after sending response
+        bufferevent_free(bev)
+    }
+}
+
+// Called when write is complete (not used in this example)
+func on_write(bev: *bufferevent, ctx: *void) void {
+    // Nothing to do
+}
+
+// Called on error or EOF
+func on_event(bev: *bufferevent, events: int16, ctx: *void) void {
+    // Connection closed - free the bufferevent
+    bufferevent_free(bev)
+}
+
+// Called when a new connection arrives
+func accept_conn(
+    listener: *evconnlistener,
+    fd: int32,
+    addr: *sockaddr,
+    socklen: int32,
+    ctx: *void
+) void {
+    // Get the event base from context
+    let base = cast<*event_base>(ctx)
+    
+    // Create a bufferevent for this connection
+    let bev = bufferevent_socket_new(base, fd, BEV_OPT_CLOSE_ON_FREE)
+    
+    // Set callbacks
+    bufferevent_setcb(bev, on_read, on_write, on_event, null)
+    
+    // Enable reading
+    bufferevent_enable(bev, EV_READ)
+}
+
+// =============================================================================
+// Main
+// =============================================================================
+
+func main() int32 {
+    printf("=== libevent HTTP Server ===\n")
+    
+    // Create event base
+    let base = event_base_new()
+    if base == null {
+        printf("Failed to create event_base\n")
+        return 1
+    }
+    
+    // Setup address to bind to (0.0.0.0:8080)
+    let sin: SockAddrIn = SockAddrIn{
+        sin_family: 2,
+        sin_port: 0x901F,
+        sin_addr: 0,
+        sin_zero: {0, 0, 0, 0, 0, 0, 0, 0}
+    }
+    
+    // Create listener
+    let listener = evconnlistener_new_bind(
+        base,
+        accept_conn,
+        cast<*void>(base),
+        LEV_OPT_REUSEABLE | LEV_OPT_CLOSE_ON_FREE,
+        -1,
+        cast<*sockaddr>(&sin),
+        16
+    )
+    
+    if listener == null {
+        printf("Failed to create listener\n")
+        event_base_free(base)
+        return 1
+    }
+    
+    printf("Listening on port 8080...\n")
+    printf("Try: curl http://localhost:8080\n")
+    
+    // Run event loop
+    event_base_dispatch(base)
+    
+    // Cleanup (not reached unless event loop exits)
+    evconnlistener_free(listener)
+    event_base_free(base)
+    
+    return 0
+}

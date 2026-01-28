@@ -1,0 +1,11 @@
+namespace main
+
+extern c {
+    func printf(*byte, ...) int32
+}
+
+func main() {
+
+    printf("main .. ok\n")
+
+}

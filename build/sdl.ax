@@ -1,0 +1,22 @@
+
+
+// ./arc build game.arc -lSDL2 -lm -ldl -lpthread -lrt -lX11 -lXext ...
+
+// ./arc build printf.arc -o printf -L /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/ -l c -v
+
+namespace main
+
+extern c {
+    func SDL_Init(flags: uint32) int32
+    func SDL_Quit() void
+}
+
+func main() int32 {
+    // 0x00000020 is SDL_INIT_VIDEO
+    let res: int32 = SDL_Init(32)
+    if res < 0 {
+        return 1
+    }
+    SDL_Quit()
+    return 0
+}

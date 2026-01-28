@@ -1,0 +1,59 @@
+@.str.0 = external constant [37 x i8] [i8 32, i8 32, i8 91, i8 84, i8 97, i8 115, i8 107, i8 32, i8 49, i8 93, i8 32, i8 87, i8 111, i8 114, i8 107, i8 105, i8 110, i8 103, i8 32, i8 40, i8 115, i8 108, i8 101, i8 101, i8 112, i8 105, i8 110, i8 103, i8 32, i8 50, i8 115, i8 41, i8 46, i8 46, i8 46, i8 10, i8 0]
+@.str.1 = external constant [18 x i8] [i8 32, i8 32, i8 91, i8 84, i8 97, i8 115, i8 107, i8 32, i8 49, i8 93, i8 32, i8 68, i8 111, i8 110, i8 101, i8 46, i8 10, i8 0]
+@.str.2 = external constant [33 x i8] [i8 32, i8 91, i8 84, i8 97, i8 115, i8 107, i8 32, i8 50, i8 93, i8 32, i8 87, i8 97, i8 105, i8 116, i8 105, i8 110, i8 103, i8 32, i8 102, i8 111, i8 114, i8 32, i8 84, i8 97, i8 115, i8 107, i8 32, i8 49, i8 46, i8 46, i8 46, i8 10, i8 0]
+@.str.3 = external constant [31 x i8] [i8 32, i8 91, i8 84, i8 97, i8 115, i8 107, i8 32, i8 50, i8 93, i8 32, i8 84, i8 97, i8 115, i8 107, i8 32, i8 49, i8 32, i8 114, i8 101, i8 116, i8 117, i8 114, i8 110, i8 101, i8 100, i8 58, i8 32, i8 37, i8 100, i8 10, i8 0]
+@.str.4 = external constant [27 x i8] [i8 91, i8 77, i8 97, i8 105, i8 110, i8 93, i8 32, i8 83, i8 112, i8 97, i8 119, i8 110, i8 105, i8 110, i8 103, i8 32, i8 84, i8 97, i8 115, i8 107, i8 32, i8 50, i8 46, i8 46, i8 46, i8 10, i8 0]
+@.str.5 = external constant [56 x i8] [i8 91, i8 77, i8 97, i8 105, i8 110, i8 93, i8 32, i8 84, i8 97, i8 115, i8 107, i8 32, i8 50, i8 32, i8 115, i8 112, i8 97, i8 119, i8 110, i8 101, i8 100, i8 46, i8 32, i8 83, i8 108, i8 101, i8 101, i8 112, i8 105, i8 110, i8 103, i8 32, i8 116, i8 111, i8 32, i8 107, i8 101, i8 101, i8 112, i8 32, i8 112, i8 114, i8 111, i8 99, i8 101, i8 115, i8 115, i8 32, i8 97, i8 108, i8 105, i8 118, i8 101, i8 46, i8 10, i8 0]
+@.str.6 = external constant [17 x i8] [i8 91, i8 77, i8 97, i8 105, i8 110, i8 93, i8 32, i8 69, i8 120, i8 105, i8 116, i8 105, i8 110, i8 103, i8 46, i8 10, i8 0]
+
+declare external ccc i32 @printf(ptr<u8>, ...)
+
+declare external ccc i32 @sleep(i32)
+
+define external ccc i32 @main_example_task() {
+entry:
+  %x.addr = alloca i64
+  store i64 100, ptr<i64> %x.addr
+  %0 = getelementptr inbounds [37 x i8], ptr<[37 x i8]> @.str.0, i32 0, i32 0
+  %1 = bitcast ptr<i8> %0 to ptr<u8>
+  %2 = call ccc i32 @printf(ptr<u8> %1)
+  %3 = call ccc i32 @sleep(i32 2)
+  %4 = getelementptr inbounds [18 x i8], ptr<[18 x i8]> @.str.1, i32 0, i32 0
+  %5 = bitcast ptr<i8> %4 to ptr<u8>
+  %6 = call ccc i32 @printf(ptr<u8> %5)
+  %7 = load i64, ptr<i64> %x.addr
+  %8 = trunc i64 %7 to i32
+  ret i32 %8
+}
+
+define external ccc i32 @main_example_task2() {
+entry:
+  %9 = getelementptr inbounds [33 x i8], ptr<[33 x i8]> @.str.2, i32 0, i32 0
+  %10 = bitcast ptr<i8> %9 to ptr<u8>
+  %11 = call ccc i32 @printf(ptr<u8> %10)
+  %result.addr = alloca i32
+  %12 = async_task_create @main_example_task()
+  %13 = async_task_await ptr<i8> %12
+  store i32 %13, ptr<i32> %result.addr
+  %14 = getelementptr inbounds [31 x i8], ptr<[31 x i8]> @.str.3, i32 0, i32 0
+  %15 = load i32, ptr<i32> %result.addr
+  %16 = bitcast ptr<i8> %14 to ptr<u8>
+  %17 = call ccc i32 @printf(ptr<u8> %16, i32 %15)
+  ret i32 0
+}
+
+define external ccc i32 @main() {
+entry:
+  %18 = getelementptr inbounds [27 x i8], ptr<[27 x i8]> @.str.4, i32 0, i32 0
+  %19 = bitcast ptr<i8> %18 to ptr<u8>
+  %20 = call ccc i32 @printf(ptr<u8> %19)
+  %21 = async_task_create @main_example_task2()
+  %22 = getelementptr inbounds [56 x i8], ptr<[56 x i8]> @.str.5, i32 0, i32 0
+  %23 = bitcast ptr<i8> %22 to ptr<u8>
+  %24 = call ccc i32 @printf(ptr<u8> %23)
+  %25 = call ccc i32 @sleep(i32 4)
+  %26 = getelementptr inbounds [17 x i8], ptr<[17 x i8]> @.str.6, i32 0, i32 0
+  %27 = bitcast ptr<i8> %26 to ptr<u8>
+  %28 = call ccc i32 @printf(ptr<u8> %27)
+  ret i32 0
+}

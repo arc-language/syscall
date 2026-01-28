@@ -1,0 +1,106 @@
+namespace main
+
+extern c {
+    func socket(int32, int32, int32) int32
+    func setsockopt(int32, int32, int32, *void, int32) int32
+    func bind(int32, *void, int32) int32
+    func listen(int32, int32) int32
+    func accept(int32, *void, *int32) int32
+    func read(int32, *void, usize) isize
+    func write(int32, *void, usize) isize
+    func close(int32) int32
+    func printf(*byte, ...) int32
+}
+
+const AF_INET: int32 = 2
+const SOCK_STREAM: int32 = 1
+const SOL_SOCKET: int32 = 1
+const SO_REUSEADDR: int32 = 2
+
+async func handle_client(fd: int32) {
+    printf("[Async] Accepted connection on FD: %d\n", fd)
+
+    let buffer: array<byte, 1024> = {}
+    let ptr = &buffer[0]
+    
+    // Blocking read inside async task
+    let n = read(fd, ptr, 1024)
+    
+    if n > 0 {
+        if cast<usize>(n) < 1024 {
+            buffer[n] = 0 
+        }
+        
+        printf("[Async] Received request:\n%s\n", ptr)
+
+        let response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nHello from Arc Async TCP!\n"
+        write(fd, response, 74)
+    }
+
+    close(fd)
+    printf("[Async] Closed FD: %d\n", fd)
+}
+
+func main() int32 {
+    let port: int32 = 8080
+    
+    // 1. Create Socket
+    let sockfd = socket(AF_INET, SOCK_STREAM, 0)
+    if sockfd < 0 {
+        printf("Failed to create socket\n")
+        return 1
+    }
+
+    // 2. Set Options
+    let opt: int32 = 1
+    setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &opt, 4)
+
+    // 3. Prepare Address (manually filling 16 bytes instead of using a struct)
+    // Structure: [Family: 2 bytes] [Port: 2 bytes] [IP: 4 bytes] [Zero: 8 bytes]
+    let addr_data: array<byte, 16> = {}
+    let raw_ptr = &addr_data[0]
+
+    // Set Family (AF_INET = 2) at offset 0
+    let family_ptr = cast<*int16>(raw_ptr)
+    *family_ptr = cast<int16>(AF_INET)
+
+    // Set Port (8080 -> 0x901F big endian) at offset 2
+    // We cast to *byte first to do byte-level arithmetic, then cast to *uint16
+    let port_ptr = cast<*uint16>(raw_ptr + 2)
+    *port_ptr = 36895 // 0x901F
+
+    // IP is 0 (INADDR_ANY) at offset 4, which is already 0 from initialization
+
+    // 4. Bind
+    if bind(sockfd, cast<*void>(raw_ptr), 16) < 0 {
+        printf("Failed to bind to port %d\n", port)
+        return 1
+    }
+
+    // 5. Listen
+    if listen(sockfd, 10) < 0 {
+        printf("Failed to listen\n")
+        return 1
+    }
+
+    printf("Server listening on http://localhost:%d\n", port)
+
+    // 6. Accept Loop
+    for {
+        // Prepare buffer for client address info (we don't strictly need to read it, but accept needs space)
+        let client_data: array<byte, 16> = {}
+        let client_len: int32 = 16
+        
+        let client_fd = accept(sockfd, cast<*void>(&client_data[0]), &client_len)
+        
+        if client_fd < 0 {
+            printf("Accept failed\n")
+            continue
+        }
+
+        // Fire and forget async task
+        handle_client(client_fd)
+    }
+
+    return 0
+}

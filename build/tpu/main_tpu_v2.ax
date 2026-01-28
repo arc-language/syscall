@@ -1,0 +1,719 @@
+namespace main
+
+// ============================================================================
+// Constants
+// ============================================================================
+const N: int32 = 1024
+const TILE_SIZE: int32 = 64
+const EPSILON: float32 = 0.00001
+const PI: float32 = 3.14159265
+
+// ============================================================================
+// TPU Kernel: Vector Addition
+// ============================================================================
+async func vec_add<tpu>(
+    a: *float32,
+    b: *float32,
+    out: *float32,
+    n: int32
+) {
+    let idx = 0
+    if idx < n {
+        let val_a = a[idx]
+        let val_b = b[idx]
+        out[idx] = val_a + val_b
+    }
+}
+
+// ============================================================================
+// TPU Kernel: Vector Subtraction
+// ============================================================================
+async func vec_sub<tpu>(
+    a: *float32,
+    b: *float32,
+    out: *float32,
+    n: int32
+) {
+    let idx = 0
+    if idx < n {
+        out[idx] = a[idx] - b[idx]
+    }
+}
+
+// ============================================================================
+// TPU Kernel: Element-wise Multiply
+// ============================================================================
+async func vec_mul<tpu>(
+    a: *float32,
+    b: *float32,
+    out: *float32,
+    n: int32
+) {
+    let idx = 0
+    if idx < n {
+        out[idx] = a[idx] * b[idx]
+    }
+}
+
+// ============================================================================
+// TPU Kernel: Element-wise Divide (with zero check)
+// ============================================================================
+async func vec_div<tpu>(
+    a: *float32,
+    b: *float32,
+    out: *float32,
+    n: int32
+) {
+    let idx = 0
+    if idx < n {
+        let divisor = b[idx]
+        // Avoid division by zero
+        if divisor > EPSILON {
+            out[idx] = a[idx] / divisor
+        } else {
+            out[idx] = 0.0
+        }
+    }
+}
+
+// ============================================================================
+// TPU Kernel: Scalar Operations
+// ============================================================================
+async func scalar_add<tpu>(data: *float32, scalar: float32, n: int32) {
+    let idx = 0
+    if idx < n {
+        data[idx] = data[idx] + scalar
+    }
+}
+
+async func scalar_mul<tpu>(data: *float32, scalar: float32, n: int32) {
+    let idx = 0
+    if idx < n {
+        data[idx] = data[idx] * scalar
+    }
+}
+
+// ============================================================================
+// TPU Kernel: Fused Multiply-Add (FMA)
+// out = a * b + c
+// ============================================================================
+async func fma<tpu>(
+    a: *float32,
+    b: *float32,
+    c: *float32,
+    out: *float32,
+    n: int32
+) {
+    let idx = 0
+    if idx < n {
+        let product = a[idx] * b[idx]
+        out[idx] = product + c[idx]
+    }
+}
+
+// ============================================================================
+// TPU Kernel: Linear Combination
+// out = alpha * a + beta * b
+// ============================================================================
+async func axpby<tpu>(
+    a: *float32,
+    b: *float32,
+    alpha: float32,
+    beta: float32,
+    out: *float32,
+    n: int32
+) {
+    let idx = 0
+    if idx < n {
+        let term1 = alpha * a[idx]
+        let term2 = beta * b[idx]
+        out[idx] = term1 + term2
+    }
+}
+
+// ============================================================================
+// TPU Kernel: Clamp Values (min/max bounds)
+// ============================================================================
+async func clamp<tpu>(
+    data: *float32,
+    min_val: float32,
+    max_val: float32,
+    out: *float32,
+    n: int32
+) {
+    let idx = 0
+    if idx < n {
+        let val = data[idx]
+        
+        // Clamp to min
+        if val < min_val {
+            val = min_val
+        }
+        
+        // Clamp to max
+        if val > max_val {
+            val = max_val
+        }
+        
+        out[idx] = val
+    }
+}
+
+// ============================================================================
+// TPU Kernel: ReLU Activation
+// out = max(0, x)
+// ============================================================================
+async func relu<tpu>(data: *float32, out: *float32, n: int32) {
+    let idx = 0
+    if idx < n {
+        let val = data[idx]
+        if val > 0.0 {
+            out[idx] = val
+        } else {
+            out[idx] = 0.0
+        }
+    }
+}
+
+// ============================================================================
+// TPU Kernel: Leaky ReLU
+// out = x if x > 0 else alpha * x
+// ============================================================================
+async func leaky_relu<tpu>(
+    data: *float32,
+    alpha: float32,
+    out: *float32,
+    n: int32
+) {
+    let idx = 0
+    if idx < n {
+        let val = data[idx]
+        if val > 0.0 {
+            out[idx] = val
+        } else {
+            out[idx] = alpha * val
+        }
+    }
+}
+
+// ============================================================================
+// TPU Kernel: Sigmoid Approximation
+// Uses polynomial approximation for TPU efficiency
+// ============================================================================
+async func sigmoid_approx<tpu>(data: *float32, out: *float32, n: int32) {
+    let idx = 0
+    if idx < n {
+        let x = data[idx]
+        
+        // Clamp input to prevent overflow
+        if x > 6.0 {
+            x = 6.0
+        }
+        if x < -6.0 {
+            x = -6.0
+        }
+        
+        // Fast sigmoid approximation: 0.5 + 0.5 * tanh(x/2)
+        // Simplified: x / (1 + |x|) rescaled
+        let abs_x = x
+        if abs_x < 0.0 {
+            abs_x = -abs_x
+        }
+        
+        out[idx] = 0.5 + (x / (2.0 + 2.0 * abs_x))
+    }
+}
+
+// ============================================================================
+// TPU Kernel: Softplus
+// out = log(1 + exp(x)) approximation
+// ============================================================================
+async func softplus<tpu>(data: *float32, out: *float32, n: int32) {
+    let idx = 0
+    if idx < n {
+        let x = data[idx]
+        
+        // For large positive x, softplus ≈ x
+        if x > 20.0 {
+            out[idx] = x
+        } else if x < -20.0 {
+            // For large negative x, softplus ≈ 0
+            out[idx] = 0.0
+        } else {
+            // Approximation for middle range
+            // Using: x + log(1 + exp(-|x|)) when x > 0
+            out[idx] = x + 0.5  // Simplified placeholder
+        }
+    }
+}
+
+// ============================================================================
+// TPU Kernel: Dot Product (Reduction)
+// ============================================================================
+async func dot_product<tpu>(
+    a: *float32,
+    b: *float32,
+    out: *float32,
+    n: int32
+) {
+    let sum: float32 = 0.0
+    
+    for i in 0..n {
+        let prod = a[i] * b[i]
+        sum = sum + prod
+    }
+    
+    out[0] = sum
+}
+
+// ============================================================================
+// TPU Kernel: Sum Reduction
+// ============================================================================
+async func reduce_sum<tpu>(data: *float32, out: *float32, n: int32) {
+    let sum: float32 = 0.0
+    
+    for i in 0..n {
+        sum = sum + data[i]
+    }
+    
+    out[0] = sum
+}
+
+// ============================================================================
+// TPU Kernel: Max Reduction
+// ============================================================================
+async func reduce_max<tpu>(data: *float32, out: *float32, n: int32) {
+    let max_val = data[0]
+    
+    for i in 1..n {
+        let val = data[i]
+        if val > max_val {
+            max_val = val
+        }
+    }
+    
+    out[0] = max_val
+}
+
+// ============================================================================
+// TPU Kernel: Min Reduction
+// ============================================================================
+async func reduce_min<tpu>(data: *float32, out: *float32, n: int32) {
+    let min_val = data[0]
+    
+    for i in 1..n {
+        let val = data[i]
+        if val < min_val {
+            min_val = val
+        }
+    }
+    
+    out[0] = min_val
+}
+
+// ============================================================================
+// TPU Kernel: Mean
+// ============================================================================
+async func reduce_mean<tpu>(data: *float32, out: *float32, n: int32) {
+    let sum: float32 = 0.0
+    
+    for i in 0..n {
+        sum = sum + data[i]
+    }
+    
+    let count = cast<float32>(n)
+    out[0] = sum / count
+}
+
+// ============================================================================
+// TPU Kernel: Normalize (subtract mean, divide by max)
+// ============================================================================
+async func normalize<tpu>(
+    data: *float32,
+    mean: float32,
+    scale: float32,
+    out: *float32,
+    n: int32
+) {
+    let idx = 0
+    if idx < n {
+        let val = data[idx]
+        let centered = val - mean
+        out[idx] = centered / scale
+    }
+}
+
+// ============================================================================
+// TPU Kernel: Polynomial Evaluation
+// out = a0 + a1*x + a2*x^2 + a3*x^3
+// ============================================================================
+async func poly_eval<tpu>(
+    x: *float32,
+    a0: float32,
+    a1: float32,
+    a2: float32,
+    a3: float32,
+    out: *float32,
+    n: int32
+) {
+    let idx = 0
+    if idx < n {
+        let val = x[idx]
+        let x2 = val * val
+        let x3 = x2 * val
+        
+        out[idx] = a0 + a1 * val + a2 * x2 + a3 * x3
+    }
+}
+
+// ============================================================================
+// TPU Kernel: Distance Squared (L2)
+// out = sum((a - b)^2)
+// ============================================================================
+async func distance_squared<tpu>(
+    a: *float32,
+    b: *float32,
+    out: *float32,
+    n: int32
+) {
+    let sum: float32 = 0.0
+    
+    for i in 0..n {
+        let diff = a[i] - b[i]
+        sum = sum + diff * diff
+    }
+    
+    out[0] = sum
+}
+
+// ============================================================================
+// TPU Kernel: Weighted Sum of 3 Vectors
+// out = w1*a + w2*b + w3*c
+// ============================================================================
+async func weighted_sum3<tpu>(
+    a: *float32,
+    b: *float32,
+    c: *float32,
+    w1: float32,
+    w2: float32,
+    w3: float32,
+    out: *float32,
+    n: int32
+) {
+    let idx = 0
+    if idx < n {
+        let t1 = w1 * a[idx]
+        let t2 = w2 * b[idx]
+        let t3 = w3 * c[idx]
+        out[idx] = t1 + t2 + t3
+    }
+}
+
+// ============================================================================
+// TPU Kernel: Threshold (Binary Step)
+// out = 1 if x > threshold else 0
+// ============================================================================
+async func threshold<tpu>(
+    data: *float32,
+    thresh: float32,
+    out: *float32,
+    n: int32
+) {
+    let idx = 0
+    if idx < n {
+        let val = data[idx]
+        if val > thresh {
+            out[idx] = 1.0
+        } else {
+            out[idx] = 0.0
+        }
+    }
+}
+
+// ============================================================================
+// TPU Kernel: Element-wise Absolute Value
+// ============================================================================
+async func abs_val<tpu>(data: *float32, out: *float32, n: int32) {
+    let idx = 0
+    if idx < n {
+        let val = data[idx]
+        if val < 0.0 {
+            out[idx] = -val
+        } else {
+            out[idx] = val
+        }
+    }
+}
+
+// ============================================================================
+// TPU Kernel: Element-wise Square
+// ============================================================================
+async func square<tpu>(data: *float32, out: *float32, n: int32) {
+    let idx = 0
+    if idx < n {
+        let val = data[idx]
+        out[idx] = val * val
+    }
+}
+
+// ============================================================================
+// TPU Kernel: Element-wise Reciprocal
+// out = 1 / x (with zero protection)
+// ============================================================================
+async func reciprocal<tpu>(data: *float32, out: *float32, n: int32) {
+    let idx = 0
+    if idx < n {
+        let val = data[idx]
+        if val > EPSILON {
+            out[idx] = 1.0 / val
+        } else if val < -EPSILON {
+            out[idx] = 1.0 / val
+        } else {
+            out[idx] = 0.0
+        }
+    }
+}
+
+// ============================================================================
+// TPU Kernel: Linear Interpolation (Lerp)
+// out = a + t * (b - a)
+// ============================================================================
+async func lerp<tpu>(
+    a: *float32,
+    b: *float32,
+    t: float32,
+    out: *float32,
+    n: int32
+) {
+    let idx = 0
+    if idx < n {
+        let start = a[idx]
+        let end = b[idx]
+        let diff = end - start
+        out[idx] = start + t * diff
+    }
+}
+
+// ============================================================================
+// TPU Kernel: Smooth Step
+// out = t^2 * (3 - 2*t) where t is clamped to [0,1]
+// ============================================================================
+async func smoothstep<tpu>(
+    data: *float32,
+    edge0: float32,
+    edge1: float32,
+    out: *float32,
+    n: int32
+) {
+    let idx = 0
+    if idx < n {
+        let x = data[idx]
+        
+        // Normalize x to [0, 1] range
+        let range = edge1 - edge0
+        let t = (x - edge0) / range
+        
+        // Clamp t
+        if t < 0.0 {
+            t = 0.0
+        }
+        if t > 1.0 {
+            t = 1.0
+        }
+        
+        // Smooth interpolation: t^2 * (3 - 2t)
+        out[idx] = t * t * (3.0 - 2.0 * t)
+    }
+}
+
+// ============================================================================
+// TPU Kernel: Batch Normalization (simplified)
+// out = (x - mean) / sqrt(variance + epsilon) * gamma + beta
+// ============================================================================
+async func batch_norm<tpu>(
+    data: *float32,
+    mean: float32,
+    variance: float32,
+    gamma: float32,
+    beta: float32,
+    out: *float32,
+    n: int32
+) {
+    let idx = 0
+    if idx < n {
+        let x = data[idx]
+        let centered = x - mean
+        
+        // Approximate 1/sqrt(var + eps)
+        let inv_std = 1.0 / (variance + EPSILON)
+        
+        let normalized = centered * inv_std
+        out[idx] = gamma * normalized + beta
+    }
+}
+
+// ============================================================================
+// TPU Kernel: Matrix-Vector Multiply (single row)
+// For full matrix multiply, dispatch multiple times or tile
+// ============================================================================
+async func matvec_row<tpu>(
+    mat_row: *float32,
+    vec: *float32,
+    out: *float32,
+    row_idx: int32,
+    cols: int32
+) {
+    let sum: float32 = 0.0
+    
+    for j in 0..cols {
+        sum = sum + mat_row[j] * vec[j]
+    }
+    
+    out[row_idx] = sum
+}
+
+// ============================================================================
+// TPU Kernel: Copy
+// ============================================================================
+async func copy<tpu>(src: *float32, dst: *float32, n: int32) {
+    let idx = 0
+    if idx < n {
+        dst[idx] = src[idx]
+    }
+}
+
+// ============================================================================
+// TPU Kernel: Fill with constant
+// ============================================================================
+async func fill<tpu>(data: *float32, val: float32, n: int32) {
+    let idx = 0
+    if idx < n {
+        data[idx] = val
+    }
+}
+
+// ============================================================================
+// TPU Kernel: Integer Operations (for indexing)
+// ============================================================================
+async func index_remap<tpu>(
+    data: *float32,
+    indices: *int32,
+    out: *float32,
+    n: int32
+) {
+    let idx = 0
+    if idx < n {
+        let src_idx = indices[idx]
+        out[idx] = data[src_idx]
+    }
+}
+
+// ============================================================================
+// TPU Kernel: Masked Operations
+// Apply operation only where mask is non-zero
+// ============================================================================
+async func masked_add<tpu>(
+    a: *float32,
+    b: *float32,
+    mask: *float32,
+    out: *float32,
+    n: int32
+) {
+    let idx = 0
+    if idx < n {
+        let m = mask[idx]
+        if m > 0.5 {
+            out[idx] = a[idx] + b[idx]
+        } else {
+            out[idx] = a[idx]
+        }
+    }
+}
+
+// ============================================================================
+// TPU Kernel: Compare and Select
+// out = a where a > b, else b
+// ============================================================================
+async func max_elementwise<tpu>(
+    a: *float32,
+    b: *float32,
+    out: *float32,
+    n: int32
+) {
+    let idx = 0
+    if idx < n {
+        let va = a[idx]
+        let vb = b[idx]
+        if va > vb {
+            out[idx] = va
+        } else {
+            out[idx] = vb
+        }
+    }
+}
+
+async func min_elementwise<tpu>(
+    a: *float32,
+    b: *float32,
+    out: *float32,
+    n: int32
+) {
+    let idx = 0
+    if idx < n {
+        let va = a[idx]
+        let vb = b[idx]
+        if va < vb {
+            out[idx] = va
+        } else {
+            out[idx] = vb
+        }
+    }
+}
+
+// ============================================================================
+// Host Entry Point - Demonstrates kernel composition
+// ============================================================================
+func main() {
+    // Allocate device buffers (simulated)
+    let dev_a: *float32 = null
+    let dev_b: *float32 = null
+    let dev_c: *float32 = null
+    let dev_out: *float32 = null
+    let dev_temp: *float32 = null
+    
+    // --- Example: Neural network forward pass (simplified) ---
+    
+    // 1. Linear layer: out = input * weights + bias (via axpby)
+    await axpby(dev_a, dev_b, 1.0, 1.0, dev_out, N)
+    
+    // 2. Batch normalization
+    await batch_norm(dev_out, 0.0, 1.0, 1.0, 0.0, dev_temp, N)
+    
+    // 3. Activation (ReLU)
+    await relu(dev_temp, dev_out, N)
+    
+    // 4. Another linear + activation
+    await fma(dev_out, dev_a, dev_b, dev_temp, N)
+    await leaky_relu(dev_temp, 0.01, dev_out, N)
+    
+    // 5. Final normalization and clamp
+    await normalize(dev_out, 0.5, 2.0, dev_temp, N)
+    await clamp(dev_temp, -1.0, 1.0, dev_out, N)
+    
+    // --- Example: Vector math pipeline ---
+    
+    // Compute distance, scale, threshold
+    await distance_squared(dev_a, dev_b, dev_temp, N)
+    await scalar_mul(dev_temp, 0.01, N)
+    await threshold(dev_temp, 0.5, dev_out, N)
+    
+    // --- Example: Interpolation ---
+    let t: float32 = 0.3
+    await lerp(dev_a, dev_b, t, dev_out, N)
+    await smoothstep(dev_out, 0.0, 1.0, dev_temp, N)
+    
+    // --- Example: Reduction chain ---
+    await reduce_sum(dev_a, dev_out, N)
+    await reduce_mean(dev_b, dev_temp, N)
+    await reduce_max(dev_c, dev_out, N)
+}

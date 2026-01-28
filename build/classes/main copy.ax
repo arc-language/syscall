@@ -1,0 +1,24 @@
+namespace main
+
+extern c {
+    func printf(*byte, ...) int32
+}
+
+class log {
+
+    func printf(self c: *log) int64 {
+        printf("log\n")
+    }
+
+    deinit(self c: *log) {
+
+    }
+}
+
+func main() int32 {
+
+    let d = log{}
+    d.printf()
+
+    return 0
+}

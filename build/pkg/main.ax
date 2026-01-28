@@ -1,0 +1,10 @@
+namespace main
+
+import c "nix.org/gcc13"
+//import c "brew.sh/git"
+//import "github.com/arc-language/syscall/linux/amd64"
+
+func main() int32 {
+
+    return 0
+}

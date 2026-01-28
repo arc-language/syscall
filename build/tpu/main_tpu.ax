@@ -1,0 +1,76 @@
+namespace main
+
+// Constants for array dimensions
+const SIZE: int32 = 1024
+
+// --- TPU Kernel 1: Vector Addition with Conditional Logic ---
+// Detects <tpu> tag -> Compiles to HLO ENTRY %vec_add
+async func vec_add<tpu>(
+    a_ptr: *float32, 
+    b_ptr: *float32, 
+    out_ptr: *float32, 
+    n: int32
+) {
+    // Simulated index (in real TPU code, this comes from special registers)
+    let idx = 0 
+    
+    // Bounds check
+    if idx < n {
+        // Load inputs
+        let val_a = a_ptr[idx]
+        let val_b = b_ptr[idx]
+        
+        // Conditional Logic inside TPU
+        // If sum > 10.0, cap it at 10.0, else keep sum
+        let sum = val_a + val_b
+        let limit = 10.0
+        
+        if sum > limit {
+            sum = limit
+        }
+
+        // Store result
+        out_ptr[idx] = sum
+    }
+}
+
+// --- TPU Kernel 2: Scalar Multiply ---
+// Demonstrates reuse of TPU backend for a second kernel
+async func scalar_mul<tpu>(
+    data_ptr: *float32, 
+    factor: float32, 
+    n: int32
+) {
+    let idx = 0
+    if idx < n {
+        let val = data_ptr[idx]
+        
+        // Basic arithmetic
+        val = val * factor
+        
+        // Store back in-place
+        data_ptr[idx] = val
+    }
+}
+
+// --- Host CPU Entry Point ---
+func main() {
+    // 1. Setup Host Data (Simulated pointers)
+    let dev_a: *float32 = null
+    let dev_b: *float32 = null
+    let dev_out: *float32 = null
+    
+    // 2. Dispatch TPU Kernel 1 (Vector Add)
+    // The compiler generates HLO for vec_add and emits a host-side launch stub
+    await vec_add(dev_a, dev_b, dev_out, SIZE)
+
+    // 3. CPU Logic (Host side processing)
+    let scale_factor: float32 = 2.5
+    if scale_factor > 1.0 {
+        // Maybe log something on CPU
+    }
+
+    // 4. Dispatch TPU Kernel 2 (In-place Scalar Multiply)
+    // Reuses the output buffer from previous step
+    await scalar_mul(dev_out, scale_factor, SIZE)
+}

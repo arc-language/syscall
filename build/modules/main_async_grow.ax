@@ -1,0 +1,63 @@
+namespace main
+
+extern c {
+    func printf(*byte, ...) int32
+    func sleep(int32) int32
+}
+
+// recursive_burn consumes stack space.
+//
+// Math:
+// Standard x86-64 stack frame minimums:
+// - Return Address: 8 bytes
+// - Saved RBP:      8 bytes
+// - Argument passing/Spills: ~16-32 bytes (depending on printf overhead)
+//
+// Approx frame size: ~48 bytes.
+//
+// 64KB (Initial) / 48 bytes ~= 1365 calls.
+//
+// We will run 5000 iterations. 
+// 5000 * 48 bytes ~= 240KB.
+// This forces the handler to fire at least 3 or 4 times (64KB -> 128KB -> 192KB -> 256KB).
+func recursive_burn(depth: int32) int32 {
+    if depth == 0 {
+        printf("  [Stack] Reached bottom (depth 0)!\n")
+        return 0
+    }
+
+    // Print every 1000 frames to visualize the boundaries 
+    // without flooding the console.
+    if depth % 1000 == 0 {
+        printf("  [Stack] Depth: %d (approx %d KB used)\n", depth, (5000 - depth) * 48 / 1024)
+    }
+
+    // Recurse
+    let res = recursive_burn(depth - 1)
+
+    // Add 0 to ensure the compiler doesn't tail-call optimize this 
+    // (forces the stack frame to stay alive until return)
+    return res + 0
+}
+
+async func worker_task() int32 {
+    printf("[Worker] Stack Test Started. Initial Limit: 64KB\n")
+    
+    // Go deep enough to force expansion
+    recursive_burn(5000)
+
+    printf("[Worker] Stack Test Passed! Survived 5000 frames.\n")
+    return 100
+}
+
+func main() int32 {
+    printf("[Main] Spawning stack eater...\n")
+    
+    let result = await worker_task()
+    
+    printf("[Main] Task returned: %d\n", result)
+
+    sleep(10)
+
+    return 0
+}
