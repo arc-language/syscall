@@ -1,10 +1,35 @@
 namespace main
 
-import c "nix.org/gcc13"
-//import c "brew.sh/git"
-//import "github.com/arc-language/syscall/linux/amd64"
+//import c "libc"
+//import c "sqlite3"
 
-func main() int32 {
+import c "github.com/arc-language/syscall/deps/libc"
+import c "github.com/arc-language/syscall/deps/sqlite3"
 
-    return 0
+
+// Define constants and opaque handle outside
+const SQLITE_OK = 0
+struct sqlite3 {}
+
+extern c {
+    func sqlite3_libversion() *byte
+    func sqlite3_open(filename: *byte, ppDb: **sqlite3) int32
+    func sqlite3_close(db: *sqlite3) int32
+    func sqlite3_errmsg(db: *sqlite3) *byte
+    
+    func printf(fmt: *byte, ...) int32
+}
+
+func main() {
+    let db: *sqlite3 = null
+
+    printf("SQLite Version: %s\n", sqlite3_libversion())
+
+    if sqlite3_open("test.db", &db) != SQLITE_OK {
+        printf("Error: %s\n", sqlite3_errmsg(db))
+    } else {
+        printf("Database opened!\n")
+    }
+
+    sqlite3_close(db)
 }

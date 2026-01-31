@@ -1,0 +1,15 @@
+name = "openssl"
+# The linker flags needed: -lssl -lcrypto
+libs = ["ssl", "crypto"]
+
+[backends]
+apt     = "libssl-dev"
+dpkg    = "libssl-dev"
+dnf     = "openssl-devel"
+brew    = "openssl@3"
+winget  = "ShiningLight.OpenSSL"
+pacman  = "openssl"
+apk     = "openssl-dev"
+zypper  = "libopenssl-devel"
+choco   = "openssl"
+nix     = "openssl"
